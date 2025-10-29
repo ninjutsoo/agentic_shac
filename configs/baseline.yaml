@@ -4,10 +4,10 @@ model_name: "meta-llama/Llama-3.1-8B-Instruct"
 dtype: "bf16"           # Set load_in_4bit: true for 24 GB GPUs
 load_in_4bit: false
 max_new_tokens: 8
-temperature: 0.1
-top_p: 0.9
+temperature: 0.0
+top_p: 1.0
 batch_size: 8
-prompt_template: "status_v1"
+prompt_template: "status_v2"
 
 # Device configuration
 device: "cuda"          # Will use GPU if available
