@@ -1,82 +1,127 @@
-Use only the SHAC social-history sections and focus on Drug StatusTime classification with triggers given. Use the MIMIC subset as primary data. SHAC text is already the social-history slice; link to MIMIC only for demographics if needed. The paper frames status as a multiple-choice argument-resolution task and emphasizes FPR as the safety metric.
+# Agentic SHAC: Drug StatusTime Classification
 
-Final, corrected roadmap
-0) Repo scaffold
+## Project Overview
+
+This project implements an **agentic multi-model system** for classifying Drug StatusTime in clinical social history notes from the SHAC dataset. The approach uses adversarial agents (Proposer/Refuter/Judge) to improve false positive rate (FPR) compared to single-model baselines.
+
+### Key Features
+- **Data Source**: SHAC social-history sections (MIMIC subset as primary)
+- **Task**: Drug StatusTime classification as multiple-choice argument-resolution
+- **Primary Metric**: False Positive Rate (FPR) for safety
+- **Model**: Llama-3.1-8B-Instruct
+- **Architecture**: Agentic pipeline with Proposer, Refuter, and Judge agents
+
+### Status Labels
+- `none` - No current or past drug use
+- `current` - Current drug use
+- `past` - Past drug use
+- `Not Applicable` - Cannot be determined
+
+---
+
+## Repository Structure
+
+```
 agentic_shac/
-  README.md
-  pyproject.toml
-  configs/
-    data.yaml
-    baseline.yaml
-    agentic.yaml
-    evaluation.yaml
-  data/
-    raw/            # symlink or copy from Track_2_SHAC/SHAC/{train,dev,test}/{mimic,uw}
-    processed/
-  experiments/
-    baseline/
-    agentic/
-    reports/
-  notebooks/
-    00_eda.ipynb
-    01_baseline_results.ipynb
-    02_agentic_pipeline.ipynb
-    03_fpr_analysis.ipynb
-    04_error_analysis.ipynb
-  src/
-    utils/
-      brat_loader.py
-      preprocess.py
-      sectionizer.py
-      io.py
-      logger.py
-      seed.py
-    baselines/
-      llama_single.py
-    agentic/
-      interfaces.py
-      prompts.py
-      proposer.py
-      refuter.py
-      judge.py
-      pipeline.py
-    evaluation/
-      metrics.py
-      run_baseline.py
-      run_agentic.py
-      compare_runs.py
-      plots.py
-  tests/
-    test_brat_loader.py
-    test_preprocess.py
-    test_prompts.py
-    test_agentic_pipeline.py
-  scripts/
-    run_smoke.sh
+├── README.md
+├── pyproject.toml
+├── configs/
+│   ├── data.yaml
+│   ├── baseline.yaml
+│   ├── agentic.yaml
+│   └── evaluation.yaml
+├── data/
+│   ├── raw/            # symlink from Track_2_SHAC/SHAC/{train,dev,test}/{mimic,uw}
+│   └── processed/
+├── experiments/
+│   ├── baseline/
+│   ├── agentic/
+│   └── reports/
+├── notebooks/
+│   ├── 00_eda.ipynb
+│   ├── 01_baseline_results.ipynb
+│   ├── 02_agentic_pipeline.ipynb
+│   ├── 03_fpr_analysis.ipynb
+│   └── 04_error_analysis.ipynb
+├── src/
+│   ├── utils/
+│   │   ├── brat_loader.py
+│   │   ├── preprocess.py
+│   │   ├── sectionizer.py
+│   │   ├── io.py
+│   │   ├── logger.py
+│   │   └── seed.py
+│   ├── baselines/
+│   │   └── llama_single.py
+│   ├── agentic/
+│   │   ├── interfaces.py
+│   │   ├── prompts.py
+│   │   ├── proposer.py
+│   │   ├── refuter.py
+│   │   ├── judge.py
+│   │   └── pipeline.py
+│   └── evaluation/
+│       ├── metrics.py
+│       ├── run_baseline.py
+│       ├── run_agentic.py
+│       ├── compare_runs.py
+│       └── plots.py
+├── tests/
+│   ├── test_brat_loader.py
+│   ├── test_preprocess.py
+│   ├── test_prompts.py
+│   └── test_agentic_pipeline.py
+└── scripts/
+    └── run_smoke.sh
+```
 
-Notes on fixes
+---
 
-Keep one data loader and one preprocessor. No duplicate pipes.
+## Design Principles
 
-Baseline model uses Llama-3.1-8B-Instruct. Avoid 3B; 8B is instruction-strong and fits your GPUs (bf16 on 32 GB; 4-bit on 24 GB). It also aligns with the paper if you later fine-tune.
+### Model Selection
+- **Primary Model**: Llama-3.1-8B-Instruct
+- **Rationale**: Instruction-strong, fits available GPUs (bf16 on 32GB; 4-bit on 24GB)
+- **Compatibility**: Aligns with paper if fine-tuning later
 
-Remove ROC/AUC; not meaningful for 3-class with asymmetric costs. Keep FPR and accuracy.
+### Data Pipeline
+- Single data loader and preprocessor (no duplicate pipes)
+- Keep only SHAC social-history sections
+- Link to MIMIC only for demographics if needed
 
-Keep prompts terse. No CoT. No warnings. Your agents provide adversarial pressure.
+### Evaluation Metrics
+- **Primary**: False Positive Rate (FPR)
+- **Secondary**: Accuracy
+- **Excluded**: ROC/AUC (not meaningful for 3-class with asymmetric costs)
 
-1) Data handling
-configs/data.yaml
+### Prompt Strategy
+- Keep prompts terse and direct
+- No Chain-of-Thought (CoT)
+- No explicit warnings
+- Adversarial pressure provided by multi-agent architecture
+
+---
+
+## Implementation Roadmap
+
+### 1. Data Handling
+
+#### Configuration (`configs/data.yaml`)
+
+```yaml
 raw_root: "/home/amin/Dropbox/code/SDOH/Track_2_SHAC/SHAC"
-sources: ["mimic"]         # use "mimic" only to match paper; you can switch to ["mimic","uw"]
-splits: ["train","dev","test"]
+sources: ["mimic"]         # Use "mimic" only to match paper; can switch to ["mimic","uw"]
+splits: ["train", "dev", "test"]
 target_event: "Drug"
-status_labels: ["none","current","past","Not Applicable"]
+status_labels: ["none", "current", "past", "Not Applicable"]
+```
 
-src/utils/brat_loader.py
+#### BRAT Loader (`src/utils/brat_loader.py`)
 
-Goal: parse .txt/.ann → rows for Drug events with StatusTime.
-Output schema (List[dict]):
+**Goal**: Parse `.txt`/`.ann` files → rows for Drug events with StatusTime
 
+**Output Schema**:
+```json
 {
   "id": "m_train_000123_drug_1",
   "split": "train",
@@ -86,55 +131,62 @@ Output schema (List[dict]):
   "trigger_text": "drug",
   "status_label": "current" | "past" | "none" | "Not Applicable"
 }
+```
 
+**BRAT Mapping**:
+- Event (E) links Alcohol|Drug|Tobacco trigger (T) to Status arg (T)
+- Attribute (A) StatusTimeVal holds the categorical label
+- **Filter**: Keep only `event_type == "Drug"`
 
-Map from BRAT: E links Alcohol|Drug|Tobacco trigger (T) to Status arg (T) and A StatusTimeVal holds the categorical label. Keep only event_type == Drug.
+#### Preprocessor (`src/utils/preprocess.py`)
 
-src/utils/preprocess.py
+**Input**: List of dicts from `brat_loader`
 
-Input: list of dicts from brat_loader.
+**Tasks**:
+- Clean text minimally (normalize whitespace; preserve semantics)
+- Create processed JSONL per split: `data/processed/{split}.jsonl`
+- Optional: Ensure patient-level non-leak splits if patient IDs exist
 
-Clean text minimally (normalize whitespace; do not remove semantics).
+#### Testing (`tests/test_brat_loader.py`)
 
-Create processed JSONL per split under data/processed/{split}.jsonl.
+- Feed 2–3 tiny `.txt`/`.ann` fixtures
+- Assert one row per Drug trigger and correct status mapping
 
-Optional: if patient IDs exist, ensure patient-level non-leak splits; otherwise keep the provided splits.
+#### EDA Notebook (`notebooks/00_eda.ipynb`)
 
-tests/test_brat_loader.py
+- Label counts and distribution
+- Split sizes
+- FPR-relevant class ratios (gold `none`/`Not Applicable` proportion)
 
-Feed 2–3 tiny .txt/.ann fixtures. Assert one row per Drug trigger and correct status mapping.
+---
 
-notebooks/00_eda.ipynb
+### 2. Baseline Model (Single Predictor)
 
-Label counts, split sizes, FPR-relevant class ratios (gold none/unknown proportion).
+**Task**: Predict StatusTime for Drug given the full SHAC note and known trigger (mirrors paper's argument-resolution step)
 
-Keep it light.
+#### Configuration (`configs/baseline.yaml`)
 
-2) Baseline model (single predictor)
-Task definition
-
-Predict StatusTime for Drug, given the full SHAC note and the known trigger. This mirrors the paper’s argument-resolution step.
-
-configs/baseline.yaml
+```yaml
 model_name: meta-llama/Meta-Llama-3.1-8B-Instruct
-dtype: bf16           # set 4bit:true for 24 GB
+dtype: bf16           # Set load_in_4bit: true for 24 GB GPUs
 load_in_4bit: false
 max_new_tokens: 8
 temperature: 0.1
 top_p: 0.9
 batch_size: 8
 prompt_template: "status_v1"
+```
 
-src/baselines/llama_single.py
+#### Inference Engine (`src/baselines/llama_single.py`)
 
-Batched inference.
+- Batched inference
+- Strict option parsing: `a|b|c|d` → status label
+- Save to `experiments/baseline/preds.jsonl` with fields: `id`, `pred`, `gold`, `raw_text`
 
-Strict option parsing from model output a|b|c|d → status.
+#### Prompt Template (`src/agentic/prompts.py`)
 
-Save experiments/baseline/preds.jsonl with id, pred, gold, raw_text.
-
-src/agentic/prompts.py (reused by baseline)
-status_v1 (no CoT, no warnings)
+**status_v1** (terse, no CoT, no warnings):
+```
 System: You classify Drug StatusTime in clinical notes.
 User:
 Note:
@@ -143,35 +195,40 @@ Note:
 Drug trigger: "{TRIGGER}"
 Options: (a) none (b) current (c) past (d) Not Applicable
 Answer with one letter.
+```
 
-src/evaluation/run_baseline.py
+#### Baseline Runner (`src/evaluation/run_baseline.py`)
 
-Load data/processed/{split}.jsonl.
+1. Load `data/processed/{split}.jsonl`
+2. Assemble prompts
+3. Run `llama_single.py`
+4. Write predictions
 
-Assemble prompts, run llama_single.py.
+#### Metrics (`src/evaluation/metrics.py`)
 
-Write predictions.
+**Map letters → labels**
 
-src/evaluation/metrics.py
+**Compute**:
+- **Accuracy**: Overall classification accuracy
+- **FPR**: False Positive Rate where gold ∈ {`none`, `Not Applicable`}
+  - Policy: `none` is negative class
+  - Decision on `Not Applicable`: Exclude from FPR denominator OR treat as negative (state choice in README)
 
-Map letters to labels.
+#### Testing (`tests/test_baseline_prompt.py`)
 
-Compute:
+- Verify correct letter extraction and label mapping
 
-Accuracy
+#### Results Notebook (`notebooks/01_baseline_results.ipynb`)
 
-FPR where gold ∈ {none, Not Applicable?}. Use your policy: in the paper “none/unknown” were negative. Keep none as negative; exclude “Not Applicable” from FPR denominator or treat it as negative if it aligns with your schema. State choice in README.
+- Summarize baseline accuracy + FPR per split
 
-tests/test_baseline_prompt.py
+---
 
-Verify correct letter extraction and mapping.
+### 3. Agentic Pipeline (Proposer / Refuter / Judge)
 
-notebooks/01_baseline_results.ipynb
+#### Data Interfaces (`src/agentic/interfaces.py`)
 
-Summarize baseline accuracy + FPR per split.
-
-3) Agentic pipeline (Proposer / Refuter / Judge)
-src/agentic/interfaces.py
+```python
 from dataclasses import dataclass
 from typing import List, Optional
 
@@ -191,9 +248,12 @@ class Evidence:
 class Verdict:
     final_choice: str
     reason: str
+```
 
-Prompts (concise)
-proposer_v1.txt
+#### Agent Prompts (Concise)
+
+**Proposer** (`proposer_v1.txt`):
+```
 System: You classify Drug StatusTime in clinical notes.
 User:
 Note:
@@ -202,8 +262,10 @@ Note:
 Drug trigger: "{TRIGGER}"
 Options: (a) none (b) current (c) past (d) Not Applicable
 Answer with one letter only.
+```
 
-refuter_v1.txt
+**Refuter** (`refuter_v1.txt`):
+```
 System: You challenge Drug StatusTime decisions using only non-cue sections.
 User:
 Non-cue text:
@@ -217,8 +279,10 @@ letter: <a|b|c|d>
 spans:
 - "<short quote or empty>"
 - "<short quote or empty>"
+```
 
-judge_v1.txt
+**Judge** (`judge_v1.txt`):
+```
 System: You decide Drug StatusTime using only non-cue evidence quality.
 User:
 Inputs:
@@ -234,48 +298,42 @@ Rules:
 3) If Proposer flips on masked note and Refuter stays stable, prefer Refuter.
 
 Return one letter.
+```
 
-src/utils/sectionizer.py
+#### Sectionizer (`src/utils/sectionizer.py`)
 
-Heuristic split into assessment_plan, problems, meds, labs, other.
+- Heuristic split into: `assessment_plan`, `problems`, `meds`, `labs`, `other`
+- Build `non_cue_text` = concat(`assessment_plan`, `problems`, `meds`, `labs`)
+- Build `masked_note` = note with sentence containing TRIGGER removed
 
-Build non_cue_text = concat(assessment_plan, problems, meds, labs).
+#### Proposer Agent (`src/agentic/proposer.py`)
 
-Build masked_note = note with the sentence containing TRIGGER removed.
+- Run `proposer_v1.txt` per item on full NOTE
+- Compute `P_MASKED` by running on `masked_note`
+- Save `proposer.jsonl`: `id`, `proposer_letter`, `proposer_masked_letter`
 
-src/agentic/proposer.py
+#### Refuter Agent (`src/agentic/refuter.py`)
 
-Run proposer_v1.txt per item on NOTE.
+- Input: `non_cue_text` + `proposer_letter`
+- Output: `refuter_letter` and up to two quoted spans
+- Save `refuter.jsonl`
 
-Also compute P_MASKED by running on masked_note.
+#### Judge Agent (`src/agentic/judge.py`)
 
-Save proposer.jsonl: id, proposer_letter, proposer_masked_letter.
+- Input: proposer/refuter outputs + `non_cue_text`
+- Apply decision rules
+- Default to `(a) none` if ambiguous (per rule 2)
+- Save `final.jsonl`
 
-src/agentic/refuter.py
+#### Pipeline Orchestrator (`src/agentic/pipeline.py`)
 
-Input non_cue_text + proposer_letter.
+- Orchestrates batched runs through all three agents
+- Retries on parsing failures
+- Caches prompts→outputs in `experiments/agentic/cache/`
 
-Return refuter_letter and up to two quoted spans.
+#### Configuration (`configs/agentic.yaml`)
 
-Save refuter.jsonl.
-
-src/agentic/judge.py
-
-Input proposer/refuter outputs + non_cue_text.
-
-Apply rules; if ambiguous, default to (a) none per rule 2.
-
-Save final.jsonl.
-
-src/agentic/pipeline.py
-
-Orchestrates batched runs.
-
-Retries on parsing failures.
-
-Caches prompts→outputs in experiments/agentic/cache/.
-
-configs/agentic.yaml
+```yaml
 model_name: meta-llama/Meta-Llama-3.1-8B-Instruct
 dtype: bf16
 load_in_4bit: false
@@ -286,79 +344,169 @@ top_p: 0.9
 prompts:
   proposer: "proposer_v1"
   refuter: "refuter_v1"
-  judge:   "judge_v1"
+  judge: "judge_v1"
 sectionizer:
-  use_sections: ["assessment_plan","problems","meds","labs"]
+  use_sections: ["assessment_plan", "problems", "meds", "labs"]
 mask_trigger_sentence: true
 ablation:
   proposer_only: false
   proposer_refuter: false
   full_triad: true
+```
 
-tests/test_agentic_pipeline.py
+#### Testing (`tests/test_agentic_pipeline.py`)
 
-Fixture: 3 tiny notes covering each class.
+- Fixture: 3 tiny notes covering each class
+- Assert pipeline returns one of `a|b|c|d` for each
+- Snapshot JSON of results for regression testing
 
-Assert pipeline returns one of a|b|c|d for each.
+#### Pipeline Notebook (`notebooks/02_agentic_pipeline.ipynb`)
 
-Snapshot a JSON of results for regression.
+- Show sample rows with proposer/refuter/judge decisions
+- Display quoted spans from refuter
 
-notebooks/02_agentic_pipeline.ipynb
+---
 
-Show a few rows with proposer/refuter/judge decisions and quoted spans.
+### 4. Evaluation & FPR Analysis
 
-4) Evaluation & FPR analysis
-src/evaluation/run_agentic.py
+#### Agentic Runner (`src/evaluation/run_agentic.py`)
 
-Run pipeline on dev/test. Save experiments/agentic/<run_id>/final.jsonl.
+- Run pipeline on dev/test splits
+- Save to `experiments/agentic/<run_id>/final.jsonl`
 
-src/evaluation/compare_runs.py
+#### Comparison Tool (`src/evaluation/compare_runs.py`)
 
-Load baseline vs agentic predictions.
+- Load baseline vs agentic predictions
+- Compute FPR deltas and accuracy deltas (per split and overall)
+- Output CSV and Markdown summary to `experiments/reports/`
 
-Compute FPR deltas and accuracy deltas per split and overall.
+#### Visualization (`src/evaluation/plots.py`)
 
-Output CSV and a Markdown summary in experiments/reports/.
+- Matplotlib bar plots for FPR by configuration
+- No seaborn dependency
 
-src/evaluation/plots.py
+#### FPR Analysis Notebook (`notebooks/03_fpr_analysis.ipynb`)
 
-Matplotlib bar plots for FPR by configuration.
+- Compare baseline vs agentic FPR drop
+- Optional: Alcohol+/Smoking+ subgroup analyses
+  - Paper stratifies by substance context
+  - Can replicate by tagging notes with alcohol/smoking mentions
 
-No seaborn requirement.
+---
 
-notebooks/03_fpr_analysis.ipynb
+### 5. Testing & Quality Assurance
 
-Compare baseline vs agentic FPR drop.
+#### Smoke Test (`tests/run_smoke.sh`)
 
-Optional: Alcohol+/Smoking+ subgroup analyses if you add those flags later. The paper stratifies by substance context; you can replicate by tagging notes with alcohol/smoking mentions if needed.
+End-to-end smoke test pipeline:
+1. Loader → Preprocess
+2. Baseline on 3 samples
+3. Agentic on 3 samples
+4. Metrics computation
 
-5) Testing & QA
-tests/run_smoke.sh
+#### Dependencies (`pyproject.toml`)
 
-Runs: loader → preprocess → baseline on 3 samples → agentic on 3 samples → metrics.
+```toml
+[tool.pytest.ini_options]
+# Add default markers
 
-pyproject.toml
+# Optional linters
+# ruff + black + mypy
+```
 
-ruff + black + mypy optional.
+---
 
-Add [tool.pytest.ini_options] default markers.
+### 6. Experiment Management
 
-6) Experiment management
+#### Logger (`src/utils/logger.py`)
 
-src/utils/logger.py writes JSON logs per run.
+- Writes JSON logs per run
+- Every run writes:
+  - `experiments/<run_id>/config.json`
+  - `experiments/<run_id>/system_prompts.txt`
 
-Every run writes experiments/<run_id>/config.json and system_prompts.txt.
+#### Reproducibility (`src/utils/seed.py`)
 
-Keep seed.py to fix random seeds for any sampling.
+- Fix random seeds for all sampling operations
 
-7) Deployment & next steps
+---
 
-Optional CLI src/cli.py:
+### 7. Deployment & Future Work
 
-baseline --split test
+#### Optional CLI (`src/cli.py`)
 
-agentic --split test
+```bash
+# Run baseline
+python -m src.cli baseline --split test
 
-evaluate --runs baseline,agentic
+# Run agentic pipeline
+python -m src.cli agentic --split test
 
-Next: Try few-shot ICL (3 shots) to mirror paper variants, or LoRA fine-tune 8B later with their hyperparams if needed.
+# Evaluate and compare
+python -m src.cli evaluate --runs baseline,agentic
+```
+
+#### Future Enhancements
+
+1. **Few-shot ICL**: Try 3-shot in-context learning to mirror paper variants
+2. **Fine-tuning**: LoRA fine-tune Llama-3.1-8B with paper hyperparameters
+3. **Extended Events**: Add Alcohol and Tobacco StatusTime classification
+4. **Multi-dataset**: Expand to UW dataset for generalization testing
+
+---
+
+## Getting Started
+
+### Prerequisites
+- Python 3.10+
+- CUDA-capable GPU (32GB for bf16, 24GB for 4-bit)
+- Access to SHAC dataset
+
+### Installation
+
+```bash
+# Clone repository
+git clone git@github.com:ninjutsoo/agentic_shac.git
+cd agentic_shac
+
+# Create conda environment
+conda create -n agentic_shac python=3.10
+conda activate agentic_shac
+
+# Install dependencies
+pip install -e .
+```
+
+### Quick Start
+
+```bash
+# 1. Prepare data
+python -m src.utils.preprocess
+
+# 2. Run baseline
+python -m src.evaluation.run_baseline --split dev
+
+# 3. Run agentic pipeline
+python -m src.evaluation.run_agentic --split dev
+
+# 4. Compare results
+python -m src.evaluation.compare_runs --baseline experiments/baseline --agentic experiments/agentic
+```
+
+---
+
+## License
+
+[Add appropriate license]
+
+## Citation
+
+If you use this code, please cite the original SHAC paper:
+
+```
+[Add citation]
+```
+
+---
+
+**Last Updated**: October 2025
