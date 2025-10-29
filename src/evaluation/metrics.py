@@ -55,32 +55,44 @@ def compute_accuracy(y_true: List[str], y_pred: List[str]) -> float:
     return correct / len(y_true) if y_true else 0.0
 
 
-def compute_fpr(y_true: List[str], y_pred: List[str], positive_class: str = 'none') -> float:
+def compute_fpr(y_true: List[str], y_pred: List[str]) -> float:
     """
-    Compute False Positive Rate (FPR) for a given class.
+    Compute False Positive Rate (FPR) as defined in the paper.
     
     FPR = FP / (FP + TN)
     
-    For safety in clinical applications, we focus on FPR for 'none' class:
-    - FP = Predicted 'none' when actually 'current'/'past' (dangerous misses)
-    - TN = Predicted 'current'/'past' when actually 'current'/'past' (correct positives)
+    Per paper definition:
+    - Negative class (no drug use): "none" or "Not Applicable"
+    - Positive class (drug use): "current" or "past"
+    - FPR computed ONLY on samples where ground truth is negative
+    
+    FP = predicted positive (current/past) when truth is negative (none/Not Applicable)
+    TN = predicted negative (none/Not Applicable) when truth is negative (none/Not Applicable)
+    
+    This measures how often we incorrectly claim drug use when patient has none.
+    Critical for safety: minimize false alarms about drug use.
     
     Args:
         y_true: Ground truth labels
         y_pred: Predicted labels
-        positive_class: The class to treat as "positive" (default: 'none')
         
     Returns:
-        FPR value (0-1)
+        FPR value (0-1), or 0.0 if no negative samples
     """
-    fp = 0  # False Positives: predicted positive_class, but actually not
-    tn = 0  # True Negatives: predicted not positive_class, and actually not
+    # Define negative and positive classes
+    negative_classes = {'none', 'Not Applicable'}
+    positive_classes = {'current', 'past'}
+    
+    fp = 0  # False Positives: predicted positive when truth is negative
+    tn = 0  # True Negatives: predicted negative when truth is negative
     
     for true, pred in zip(y_true, y_pred):
-        if pred == positive_class and true != positive_class:
-            fp += 1
-        elif pred != positive_class and true != positive_class:
-            tn += 1
+        # Only consider samples where ground truth is negative
+        if true in negative_classes:
+            if pred in positive_classes:
+                fp += 1  # Incorrectly predicted drug use
+            elif pred in negative_classes:
+                tn += 1  # Correctly predicted no drug use
     
     denominator = fp + tn
     return fp / denominator if denominator > 0 else 0.0
@@ -141,7 +153,7 @@ def compute_all_metrics(y_true: List[str], y_pred: List[str], labels: List[str] 
     
     # Overall metrics
     accuracy = compute_accuracy(y_true, y_pred)
-    fpr = compute_fpr(y_true, y_pred, positive_class='none')
+    fpr = compute_fpr(y_true, y_pred)
     
     # Per-class metrics
     per_class = compute_per_class_metrics(y_true, y_pred, labels)
@@ -178,7 +190,9 @@ def print_metrics_report(metrics: Dict):
     
     print(f"\nOverall Metrics:")
     print(f"  Accuracy: {metrics['accuracy']:.4f}")
-    print(f"  FPR (False Positive Rate for 'none'): {metrics['fpr']:.4f}")
+    print(f"  FPR (False Positive Rate): {metrics['fpr']:.4f}")
+    print(f"      → Measures: predicted drug use (current/past) when truth is no use (none/Not Applicable)")
+    print(f"      → Lower is better (minimize false alarms about drug use)")
     print(f"  Total Samples: {metrics['n_samples']}")
     
     print(f"\nLabel Distribution (Ground Truth):")

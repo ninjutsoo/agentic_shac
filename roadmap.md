@@ -99,9 +99,39 @@ agentic_shac/
 - Link to MIMIC only for demographics if needed
 
 ### Evaluation Metrics
-- **Primary**: False Positive Rate (FPR)
-- **Secondary**: Accuracy
-- **Excluded**: ROC/AUC (not meaningful for 3-class with asymmetric costs)
+
+#### Primary Metric: False Positive Rate (FPR)
+
+Per paper definition, FPR is computed using binary risk grouping:
+
+**Classification Space:**
+- Model outputs: 3 labels (none, current, past)
+
+**Evaluation Grouping:**
+- **Negative class** (no drug use): `none` or `Not Applicable`
+- **Positive class** (drug use): `current` or `past`
+
+**FPR Calculation:**
+```
+FPR = FP / (FP + TN)
+```
+Where:
+- **FP** = predicted positive (current/past) when truth is negative (none/Not Applicable)
+- **TN** = predicted negative (none/Not Applicable) when truth is negative (none/Not Applicable)
+- **Only computed on samples where ground truth is negative**
+
+**Interpretation:**
+- Measures: How often we incorrectly claim drug use when patient has none
+- Critical for safety: Minimize false alarms about drug use
+- Lower is better (target: <15% for safety)
+
+#### Secondary Metrics
+- **Accuracy**: Overall 3-class accuracy (for completeness)
+- **Per-class F1**: Precision/Recall for each class
+- **Confusion Matrix**: Full 3×3 matrix
+
+#### Excluded Metrics
+- **ROC/AUC**: Not meaningful for 3-class with asymmetric costs
 
 ### Prompt Strategy
 - Keep prompts terse and direct
@@ -286,7 +316,10 @@ status_labels: ["none", "current", "past", "Not Applicable"]
 **Analysis**:
 1. Label counts and distribution per split
 2. Text length statistics
-3. FPR-relevant class ratios (gold `none`/`Not Applicable` proportion)
+3. **FPR-relevant class ratios**:
+   - Negative class proportion: `none` + `Not Applicable` (no drug use)
+   - Positive class proportion: `current` + `past` (drug use)
+   - Important for understanding FPR denominator
 4. Sample examples from each class
 5. Data quality checks (duplicates, missing values)
 6. **MIMIC vs UW comparison**:
@@ -357,11 +390,17 @@ Answer with one letter.
 
 ##### 5. Metrics Module (`src/evaluation/metrics.py`)
 - Map letters → labels
-- Compute:
-  - **Accuracy**: Overall classification accuracy
-  - **FPR**: False Positive Rate where gold ∈ {`none`, `Not Applicable`}
-    - Policy: `none` is negative class
-    - Decision on `Not Applicable`: Document in README
+- Compute metrics per paper definition:
+  - **Accuracy**: Overall 3-class classification accuracy
+  - **FPR**: False Positive Rate (primary metric)
+    - Negative class: `none` OR `Not Applicable` (no drug use)
+    - Positive class: `current` OR `past` (drug use)
+    - FPR = FP / (FP + TN)
+    - FP = predicted positive when truth is negative
+    - TN = predicted negative when truth is negative
+    - Computed ONLY on samples where ground truth is negative
+  - **Per-class metrics**: Precision, Recall, F1 for each class
+  - **Confusion matrix**: Full 3×3 matrix
 
 ##### 6. Unit Tests (`tests/test_baseline_prompt.py`)
 - Verify correct letter extraction and label mapping
