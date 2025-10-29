@@ -25,25 +25,26 @@ This project implements an **agentic multi-model system** for classifying Drug S
 agentic_shac/
 ├── README.md
 ├── pyproject.toml
-├── configs/
+├── configs/                    # Configuration files
 │   ├── data.yaml
 │   ├── baseline.yaml
 │   ├── agentic.yaml
 │   └── evaluation.yaml
 ├── data/
-│   ├── raw/            # symlink from Track_2_SHAC/SHAC/{train,dev,test}/{mimic,uw}
-│   └── processed/
-├── experiments/
+│   ├── raw/                    # Symlink from Track_2_SHAC/SHAC/
+│   └── processed/              # Processed JSONL files
+├── experiments/                # Experiment outputs
 │   ├── baseline/
 │   ├── agentic/
 │   └── reports/
-├── notebooks/
-│   ├── 00_eda.ipynb
-│   ├── 01_baseline_results.ipynb
-│   ├── 02_agentic_pipeline.ipynb
-│   ├── 03_fpr_analysis.ipynb
-│   └── 04_error_analysis.ipynb
-├── src/
+├── notebooks/                  # 📓 Interactive notebooks (USER runs these)
+│   ├── 01_test_brat_loader.ipynb
+│   ├── 02_test_preprocess.ipynb
+│   ├── 03_data_eda.ipynb
+│   ├── 04_test_model_loading.ipynb
+│   ├── 05_test_baseline_inference.ipynb
+│   └── ...
+├── src/                        # Production code
 │   ├── utils/
 │   │   ├── brat_loader.py
 │   │   ├── preprocess.py
@@ -66,12 +67,20 @@ agentic_shac/
 │       ├── run_agentic.py
 │       ├── compare_runs.py
 │       └── plots.py
-├── tests/
-│   ├── test_brat_loader.py
-│   ├── test_preprocess.py
-│   ├── test_prompts.py
-│   └── test_agentic_pipeline.py
-└── scripts/
+├── tests/                      # 🧪 Automated tests
+│   ├── unit/                   # Unit tests (pytest)
+│   │   ├── test_brat_loader.py
+│   │   ├── test_preprocess.py
+│   │   ├── test_prompts.py
+│   │   └── test_metrics.py
+│   └── integration/            # Integration tests (AI runs these)
+│       ├── phase1_test_brat_loader.py
+│       ├── phase2_test_prompts.py
+│       ├── phase2_test_model_loading.py
+│       └── ...
+└── scripts/                    # Utility scripts
+    ├── process_full_dataset.py
+    ├── cleanup_old_models.sh
     └── run_smoke.sh
 ```
 
@@ -102,12 +111,66 @@ agentic_shac/
 
 ---
 
+## Testing Philosophy
+
+We use a **dual-testing approach** to ensure rigor and transparency:
+
+### 1. Interactive Notebooks (`notebooks/`) 
+**Purpose**: For **USER** to run and validate
+
+- **Format**: Jupyter notebooks (`.ipynb`)
+- **Who runs**: User runs these interactively
+- **Purpose**: 
+  - Verify each cell's output makes sense
+  - See actual data and intermediate results
+  - Validate on sample data (3-10 examples)
+  - Understand what the code is doing
+- **When**: Before committing to next phase
+- **Example**: `notebooks/04_test_model_loading.ipynb`
+
+### 2. Integration Test Scripts (`tests/integration/`)
+**Purpose**: For **AI** to rigorously validate
+
+- **Format**: Python scripts (`.py`)
+- **Who runs**: AI runs these before claiming something works
+- **Purpose**:
+  - Automatically verify code works end-to-end
+  - Test on actual data (not mocked)
+  - Catch errors before user sees them
+  - Provide honest pass/fail results
+- **When**: Before creating notebooks or claiming completion
+- **Example**: `tests/integration/phase2_test_model_loading.py`
+
+### 3. Unit Tests (`tests/unit/`)
+**Purpose**: For regression testing
+
+- **Format**: pytest tests
+- **Who runs**: Both (during development and CI/CD)
+- **Purpose**: Test individual functions in isolation
+
+### Testing Workflow
+
+For each phase:
+
+```
+1. AI creates integration test script (tests/integration/phaseN_*.py)
+2. AI runs the script and verifies it passes
+3. AI creates interactive notebook (notebooks/NN_*.ipynb) based on working script
+4. User runs notebook and validates outputs
+5. ✅ Only then proceed to next phase
+```
+
+**Key Rule**: **AI MUST run integration tests and HONESTLY report results** before claiming anything works.
+
+---
+
 ## Implementation Roadmap - Phased Approach
 
 Each phase includes:
-- **Production modules** (.py) for full dataset processing
-- **Test notebooks** (.ipynb) for sample validation and debugging
-- **Validation criteria** to verify before proceeding to next phase
+- **Production modules** (`.py`) - For full dataset processing
+- **Integration test script** (`.py`) - AI runs this FIRST to validate
+- **Interactive notebook** (`.ipynb`) - User runs this to verify
+- **Validation criteria** - Checklist before proceeding
 
 ---
 

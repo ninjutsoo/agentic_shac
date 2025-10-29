@@ -1,6 +1,6 @@
 # Baseline model configuration for Drug StatusTime classification
 
-model_name: "meta-llama/Meta-Llama-3.1-8B-Instruct"
+model_name: "meta-llama/Llama-3.1-8B-Instruct"
 dtype: "bf16"           # Set load_in_4bit: true for 24 GB GPUs
 load_in_4bit: false
 max_new_tokens: 8
