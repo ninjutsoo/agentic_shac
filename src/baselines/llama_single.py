@@ -79,10 +79,10 @@ Choose exactly ONE option and respond with a single letter in parentheses:
 (d) Not Applicable  = trigger not about the patient's drug use status
 
 Decision rules:
-- If the note contains negation about the trigger (e.g., "denies", "(-)", "no", "negative"), choose (a) none.
+- If the note contains negation about the trigger (e.g., "denies", "(-)", "no", "negative") referring to the patient, choose (a) none.
 - If it says "history of"/"quit"/"clean for X years" without current use, choose (c) past.
-- Mentions about family/others or screening without patient use → (a) none.
-- If uncertain or no evidence of patient use → (a) none.
+- Mentions about family/others or context not describing the patient's own status → (d) Not Applicable.
+- If the evidence is insufficient to determine none/current/past, choose (d) Not Applicable.
 
 Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
         
