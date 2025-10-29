@@ -8,6 +8,9 @@ dependencies = [
     "numpy",
     "pyyaml",
     "tqdm",
+    "torch>=2.0",
+    "transformers>=4.30",
+    "accelerate",
 ]
 
 [project.optional-dependencies]
