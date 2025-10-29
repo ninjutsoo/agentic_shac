@@ -5,7 +5,7 @@
 This project implements an **agentic multi-model system** for classifying Drug StatusTime in clinical social history notes from the SHAC dataset. The approach uses adversarial agents (Proposer/Refuter/Judge) to improve false positive rate (FPR) compared to single-model baselines.
 
 ### Key Features
-- **Data Source**: SHAC social-history sections (MIMIC subset as primary)
+- **Data Source**: SHAC social-history sections (MIMIC + UW datasets)
 - **Task**: Drug StatusTime classification as multiple-choice argument-resolution
 - **Primary Metric**: False Positive Rate (FPR) for safety
 - **Model**: Llama-3.1-8B-Instruct
@@ -148,7 +148,7 @@ Each phase includes:
 ##### 1. Configuration (`configs/data.yaml`)
 ```yaml
 raw_root: "/home/amin/Dropbox/code/SDOH/Track_2_SHAC/SHAC"
-sources: ["mimic"]         # Use "mimic" only to match paper; can switch to ["mimic","uw"]
+sources: ["mimic", "uw"]   # Use both MIMIC and UW datasets
 splits: ["train", "dev", "test"]
 target_event: "Drug"
 status_labels: ["none", "current", "past", "Not Applicable"]
@@ -161,7 +161,7 @@ status_labels: ["none", "current", "past", "Not Applicable"]
 {
   "id": "m_train_000123_drug_1",
   "split": "train",
-  "source": "mimic",
+    "source": "mimic" | "uw",
   "note_id": "...",
   "text": "<full social-history text>",
   "trigger_text": "drug",
@@ -172,6 +172,7 @@ status_labels: ["none", "current", "past", "Not Applicable"]
   - Event (E) links Alcohol|Drug|Tobacco trigger (T) to Status arg (T)
   - Attribute (A) StatusTimeVal holds categorical label
   - **Filter**: Keep only `event_type == "Drug"`
+  - **Source tracking**: Preserve whether sample is from MIMIC or UW
 
 ##### 3. Preprocessor (`src/utils/preprocess.py`)
 - Input: List of dicts from `brat_loader`
@@ -225,6 +226,10 @@ status_labels: ["none", "current", "past", "Not Applicable"]
 3. FPR-relevant class ratios (gold `none`/`Not Applicable` proportion)
 4. Sample examples from each class
 5. Data quality checks (duplicates, missing values)
+6. **MIMIC vs UW comparison**:
+   - Label distribution differences
+   - Text length differences
+   - Any domain-specific patterns
 
 #### Validation Criteria
 - ✅ BRAT loader successfully parses all sample files
@@ -236,10 +241,11 @@ status_labels: ["none", "current", "past", "Not Applicable"]
 - ✅ Text preserved with minimal cleaning
 
 **📊 Expected Stats**:
-- Train samples: ~XXX Drug events
-- Dev samples: ~XXX Drug events
-- Test samples: ~XXX Drug events
-- Class distribution: Document in EDA notebook
+- Train samples: ~XXX Drug events (MIMIC + UW)
+- Dev samples: ~XXX Drug events (MIMIC + UW)
+- Test samples: ~XXX Drug events (MIMIC + UW)
+- MIMIC vs UW split: Document in EDA notebook
+- Class distribution: Document in EDA notebook per source
 
 ---
 
@@ -720,7 +726,10 @@ ablation:
    - Role of Refuter spans
    - Role of Proposer flips
    - Judge decision patterns
-6. Calculate FPR by subgroups (if applicable)
+6. Calculate FPR by subgroups:
+   - **By source**: MIMIC vs UW
+   - By label class
+   - By text length
 
 **Expected Output**:
 ```python
@@ -1200,10 +1209,10 @@ After successful Phase 7 completion, consider:
 - Add Tobacco StatusTime classification
 - Multi-task learning across all three substances
 
-### 4. Multi-Dataset Evaluation
-- Expand to UW dataset for generalization
-- Cross-dataset evaluation (train MIMIC, test UW)
-- Domain adaptation techniques
+### 4. Cross-Dataset Evaluation
+- Analyze MIMIC vs UW performance differences
+- Cross-dataset evaluation (train MIMIC, test UW and vice versa)
+- Domain adaptation techniques for cross-dataset generalization
 
 ### 5. Advanced Agentic Features
 - Dynamic agent selection (when to use Refuter?)
