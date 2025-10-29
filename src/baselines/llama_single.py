@@ -63,13 +63,28 @@ class LlamaSingleBaseline:
         Returns:
             Formatted prompt string
         """
-        system_msg = "You classify Drug StatusTime in clinical notes."
+        system_msg = (
+            "You are a clinical NLP assistant. Classify temporal drug use status for the PATIENT "
+            "given a clinical note and a highlighted trigger mention. Use ONLY evidence about the patient."
+        )
         user_msg = f"""Note:
 {note}
 
-Drug trigger: "{trigger}"
-Options: (a) none (b) current (c) past (d) Not Applicable
-Answer with one letter."""
+Trigger mention: "{trigger}"
+
+Choose exactly ONE option and respond with a single letter in parentheses:
+(a) none            = patient denies use OR there is no evidence about the patient using
+(b) current         = evidence the patient currently/recently uses
+(c) past            = patient used in the past but not currently
+(d) Not Applicable  = trigger not about the patient's drug use status
+
+Decision rules:
+- If the note contains negation about the trigger (e.g., "denies", "(-)", "no", "negative"), choose (a) none.
+- If it says "history of"/"quit"/"clean for X years" without current use, choose (c) past.
+- Mentions about family/others or screening without patient use → (a) none.
+- If uncertain or no evidence of patient use → (a) none.
+
+Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
         
         # Llama-3.1-Instruct format
         prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
@@ -150,9 +165,9 @@ Answer with one letter."""
                 outputs = self.model.generate(
                     **inputs,
                     max_new_tokens=self.config.get('max_new_tokens', 8),
-                    temperature=self.config.get('temperature', 0.1),
-                    top_p=self.config.get('top_p', 0.9),
-                    do_sample=self.config.get('temperature', 0.1) > 0
+                    temperature=0.0,
+                    top_p=1.0,
+                    do_sample=False
                 )
             
             # Decode
