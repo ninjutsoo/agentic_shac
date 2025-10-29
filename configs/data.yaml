@@ -1,0 +1,11 @@
+# Data configuration for SHAC Drug StatusTime classification
+
+raw_root: "/home/amin/Dropbox/code/SDOH/Track_2_SHAC/SHAC"
+sources: ["mimic", "uw"]   # Use both MIMIC and UW datasets
+splits: ["train", "dev", "test"]
+target_event: "Drug"
+status_labels: ["none", "current", "past", "Not Applicable"]
+
+# Output paths
+processed_dir: "data/processed"
+
