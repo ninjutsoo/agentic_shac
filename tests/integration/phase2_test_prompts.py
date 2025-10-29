@@ -1,5 +1,12 @@
 """Quick test for prompts module"""
 
+import sys
+from pathlib import Path
+
+# Add project root to path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from src.agentic.prompts import (
     get_prompt, format_for_llama, parse_model_output, 
     letter_to_label, LABEL_TO_LETTER, LETTER_TO_LABEL

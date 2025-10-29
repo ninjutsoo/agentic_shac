@@ -1,11 +1,18 @@
 """Quick test script for BRAT loader"""
 
+import sys
 from pathlib import Path
+
+# Add project root to path
+project_root = Path(__file__).parent.parent.parent
+sys.path.insert(0, str(project_root))
+
 from src.utils.brat_loader import BRATLoader
 import yaml
 
 # Load config
-with open('configs/data.yaml', 'r') as f:
+config_path = project_root / 'configs' / 'data.yaml'
+with open(config_path, 'r') as f:
     config = yaml.safe_load(f)
 
 print("="*80)
