@@ -1,3 +1,11 @@
-__pycache__/\n*.pyc\n*.pyo\n.ipynb_checkpoints/\n*.egg-info/\nbuild/\ndist/
 __pycache__/
 *.pyc
+*.pyo
+.ipynb_checkpoints/
+*.egg-info/
+build/
+dist/
+
+# Accidental files (files starting with = or other special characters from command errors)
+=/.*
+=*
