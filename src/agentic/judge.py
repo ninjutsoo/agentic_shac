@@ -83,35 +83,35 @@ class JudgeAgent:
         Returns:
             Final letter choice (a/b/c/d)
         """
-        # Rule 2: If spans give no support, choose (a) none
-        # Check ALL spans, not just the first one
+        # Check if we have valid spans
         has_valid_spans = any(span and span.strip() for span in refuter_spans)
-        if not has_valid_spans:
-            return "a"
+        non_cue_lower = non_cue_text.lower() if non_cue_text else ""
+        
+        # Rule 1: Prefer the letter supported by Refuter spans (if spans exist and are valid)
+        if refuter_letter and refuter_letter in ['a', 'b', 'c', 'd'] and has_valid_spans:
+            # Check if spans actually exist in non_cue_text
+            if any(span.lower() in non_cue_lower for span in refuter_spans if span.strip()):
+                return refuter_letter
         
         # Rule 3: If Proposer flips on masked note and Refuter stays stable, prefer Refuter
         # "Refuter stays stable" means Refuter didn't agree with the flipped proposer
         if (proposer_letter and proposer_masked_letter and 
             proposer_letter != proposer_masked_letter and
-            refuter_letter and refuter_letter != proposer_masked_letter):
+            refuter_letter and refuter_letter in ['a', 'b', 'c', 'd'] and
+            refuter_letter != proposer_masked_letter):
             # Proposer flipped, Refuter stable (didn't follow the flip) -> prefer Refuter
-            return refuter_letter if refuter_letter in ['a', 'b', 'c', 'd'] else "a"
+            return refuter_letter
         
-        # Rule 1: Prefer the letter supported by Refuter spans
-        if refuter_letter and refuter_letter in ['a', 'b', 'c', 'd']:
-            # Check if spans support the refuter letter
-            spans_text = " ".join(refuter_spans).lower()
-            non_cue_lower = non_cue_text.lower()
-            
-            # If spans exist in non_cue_text, prefer refuter
-            if any(span.lower() in non_cue_lower for span in refuter_spans if span.strip()):
-                return refuter_letter
-        
-        # Fallback to proposer if available
+        # Fallback to proposer if available (proposer is primary decision maker)
         if proposer_letter and proposer_letter in ['a', 'b', 'c', 'd']:
             return proposer_letter
         
-        # Default to (a) none
+        # Fallback to refuter letter if valid (but only if proposer unavailable)
+        if refuter_letter and refuter_letter in ['a', 'b', 'c', 'd']:
+            return refuter_letter
+        
+        # Rule 2: If spans give no support AND we have no other evidence, choose (a) none
+        # Only default to "a" if we truly have no evidence at all
         return "a"
     
     def predict_single(self, proposer_letter: Optional[str], refuter_letter: Optional[str],
