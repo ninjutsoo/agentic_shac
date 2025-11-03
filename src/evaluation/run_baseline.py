@@ -7,6 +7,7 @@ and prints evaluation metrics (including FPR).
 
 import argparse
 import json
+import time
 from datetime import datetime
 from pathlib import Path
 import yaml
@@ -75,7 +76,10 @@ def main():
         print(f"Loaded {len(samples)} samples.")
 
         print("Running inference...")
+        start_time = time.time()
         results = baseline.predict_batch(samples, show_progress=True)
+        inference_time = time.time() - start_time
+        print(f"Inference completed in {inference_time:.2f} seconds ({inference_time/len(samples):.4f} seconds per sample)")
 
         # Save predictions
         preds_path = run_dir / f"preds_{split}.jsonl"
@@ -91,7 +95,11 @@ def main():
         metrics = compute_all_metrics(y_true, y_pred, labels=labels)
         print_metrics_report(metrics)
 
-        # Save metrics JSON
+        # Save metrics JSON (include timing information)
+        metrics['inference_time'] = inference_time
+        metrics['n_samples'] = len(samples)
+        metrics['split'] = split
+        metrics['run_id'] = run_dir.name
         metrics_path = run_dir / f"metrics_{split}.json"
         with open(metrics_path, "w", encoding="utf-8") as f:
             json.dump(metrics, f, default=lambda o: o.tolist() if hasattr(o, "tolist") else o, indent=2)

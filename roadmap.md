@@ -37,6 +37,8 @@ agentic_shac/
 │   ├── baseline/
 │   ├── agentic/
 │   └── reports/
+├── results/                    # Comprehensive comparison reports
+│   └── comparison_report_*.txt # Detailed text reports with all metrics and timing
 ├── notebooks/                  # 📓 Interactive notebooks (USER runs these)
 │   ├── 01_test_brat_loader.ipynb
 │   ├── 02_test_preprocess.ipynb
@@ -830,15 +832,27 @@ ablation:
 
 ##### 3. Full Comparison Runner (`src/evaluation/run_full_comparison.py`)
 - Orchestrates complete comparison pipeline:
-  1. Run baseline on full dev/test splits
-  2. Run agentic on full dev/test splits
+  1. Run baseline on full dev/test splits (with timing tracking)
+  2. Run agentic on full dev/test splits (with timing tracking)
   3. Automatically compare results
   4. Generate comprehensive comparison reports
 - Supports skipping steps (e.g., if baseline already run)
 - Provides big batch quantitative comparison
 - Usage: `python -m src.evaluation.run_full_comparison --split dev test`
 
-##### 4. Visualization (`src/evaluation/plots.py`)
+##### 4. Comprehensive Text Reports (`src/evaluation/compare_runs.py`)
+- Generates detailed text reports saved in `results/` folder
+- Report includes:
+  - Experiment metadata (date, run IDs, split)
+  - Data description (sources, label distribution, sample counts)
+  - Timing information (inference time, time per sample, speedup factor)
+  - Overall metrics (accuracy, FPR with relative changes)
+  - Per-class metrics (F1, precision, recall for each label)
+  - Detailed metrics breakdown (macro averages)
+- File naming: `results/comparison_report_{split}_{timestamp}.txt`
+- Also generates CSV, Markdown, and JSON reports in `experiments/reports/`
+
+##### 5. Visualization (`src/evaluation/plots.py`)
 - Matplotlib bar plots for FPR by configuration
 - Confusion matrix heatmaps
 - Per-class performance comparisons

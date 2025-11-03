@@ -11,6 +11,7 @@ from pathlib import Path
 from typing import Dict, List, Optional
 from datetime import datetime
 import csv
+import time
 
 from src.utils.preprocess import load_from_jsonl
 from src.evaluation.metrics import compute_all_metrics, print_metrics_report
@@ -219,6 +220,153 @@ def save_comparison_markdown(deltas: Dict, output_path: Path, split: str, baseli
     print(f"Saved comparison Markdown to: {output_path}")
 
 
+def save_comprehensive_txt_report(deltas: Dict, baseline_metrics: Dict, agentic_metrics: Dict,
+                                   output_path: Path, split: str, baseline_run_id: str, agentic_run_id: str,
+                                   baseline_data_path: Path, agentic_data_path: Path,
+                                   baseline_time: Optional[float] = None, agentic_time: Optional[float] = None):
+    """Save comprehensive text report with all experiment details."""
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    
+    # Get data description
+    from collections import Counter
+    try:
+        baseline_samples = load_predictions(baseline_data_path) if baseline_data_path.exists() else []
+    except:
+        baseline_samples = []
+    try:
+        agentic_samples = load_predictions(agentic_data_path) if agentic_data_path.exists() else []
+    except:
+        agentic_samples = []
+    
+    # Analyze data
+    baseline_sources = Counter(s.get('source', 'unknown') for s in baseline_samples)
+    agentic_sources = Counter(s.get('source', 'unknown') for s in agentic_samples)
+    baseline_labels = Counter(s.get('status_label', 'unknown') for s in baseline_samples)
+    agentic_labels = Counter(s.get('status_label', 'unknown') for s in agentic_samples)
+    
+    with open(output_path, 'w', encoding='utf-8') as f:
+        f.write("=" * 80 + "\n")
+        f.write("BASELINE vs AGENTIC COMPREHENSIVE COMPARISON REPORT\n")
+        f.write("=" * 80 + "\n\n")
+        
+        # Experiment metadata
+        f.write("EXPERIMENT METADATA\n")
+        f.write("-" * 80 + "\n")
+        f.write(f"Date: {datetime.now().strftime('%Y-%m-%d %H:%M:%S')}\n")
+        f.write(f"Split: {split.upper()}\n")
+        f.write(f"Baseline Run ID: {baseline_run_id}\n")
+        f.write(f"Agentic Run ID: {agentic_run_id}\n")
+        f.write("\n")
+        
+        # Data description
+        f.write("DATA DESCRIPTION\n")
+        f.write("-" * 80 + "\n")
+        f.write(f"Total Samples: {deltas['n_samples']}\n")
+        f.write(f"Baseline Samples: {len(baseline_samples)}\n")
+        f.write(f"Agentic Samples: {len(agentic_samples)}\n")
+        f.write("\n")
+        
+        f.write("Data Sources (Baseline):\n")
+        for source, count in baseline_sources.items():
+            f.write(f"  - {source}: {count}\n")
+        f.write("\n")
+        
+        f.write("Data Sources (Agentic):\n")
+        for source, count in agentic_sources.items():
+            f.write(f"  - {source}: {count}\n")
+        f.write("\n")
+        
+        f.write("Label Distribution (Baseline):\n")
+        for label, count in sorted(baseline_labels.items()):
+            f.write(f"  - {label}: {count} ({count/len(baseline_samples)*100:.1f}%)\n")
+        f.write("\n")
+        
+        f.write("Label Distribution (Agentic):\n")
+        for label, count in sorted(agentic_labels.items()):
+            f.write(f"  - {label}: {count} ({count/len(agentic_samples)*100:.1f}%)\n")
+        f.write("\n")
+        
+        # Timing information
+        f.write("TIMING INFORMATION\n")
+        f.write("-" * 80 + "\n")
+        if baseline_time is not None:
+            f.write(f"Baseline Inference Time: {baseline_time:.2f} seconds\n")
+            f.write(f"Baseline Time per Sample: {baseline_time/len(baseline_samples):.4f} seconds\n")
+        else:
+            f.write("Baseline Inference Time: Not available\n")
+        f.write("\n")
+        
+        if agentic_time is not None:
+            f.write(f"Agentic Inference Time: {agentic_time:.2f} seconds\n")
+            f.write(f"Agentic Time per Sample: {agentic_time/len(agentic_samples):.4f} seconds\n")
+            if baseline_time is not None:
+                speedup = baseline_time / agentic_time if agentic_time > 0 else 0
+                f.write(f"Speedup Factor: {speedup:.2f}x\n")
+        else:
+            f.write("Agentic Inference Time: Not available\n")
+        f.write("\n")
+        
+        # Overall metrics
+        f.write("OVERALL METRICS\n")
+        f.write("-" * 80 + "\n")
+        f.write(f"Accuracy:\n")
+        f.write(f"  Baseline: {deltas['accuracy']['baseline']:.4f}\n")
+        f.write(f"  Agentic:  {deltas['accuracy']['agentic']:.4f}\n")
+        f.write(f"  Change:   {deltas['accuracy']['absolute']:+.4f} ({deltas['accuracy']['relative']:+.1f}%)\n")
+        f.write("\n")
+        
+        f.write(f"FPR (False Positive Rate) - PRIMARY METRIC:\n")
+        f.write(f"  Baseline: {deltas['fpr']['baseline']:.4f}\n")
+        f.write(f"  Agentic:  {deltas['fpr']['agentic']:.4f}\n")
+        f.write(f"  Change:   {deltas['fpr']['absolute']:+.4f} ({deltas['fpr']['relative']:+.1f}%)\n")
+        if deltas['fpr']['absolute'] < 0:
+            improvement = abs(deltas['fpr']['absolute']) / deltas['fpr']['baseline'] * 100 if deltas['fpr']['baseline'] > 0 else 0
+            f.write(f"  ✅ FPR IMPROVED by {improvement:.1f}% (relative reduction)\n")
+        elif deltas['fpr']['absolute'] > 0:
+            degradation = deltas['fpr']['absolute'] / deltas['fpr']['baseline'] * 100 if deltas['fpr']['baseline'] > 0 else 0
+            f.write(f"  ⚠️  FPR WORSENED by {degradation:.1f}% (relative increase)\n")
+        else:
+            f.write(f"  ➡️  FPR unchanged\n")
+        f.write("\n")
+        
+        # Per-class metrics
+        f.write("PER-CLASS METRICS\n")
+        f.write("-" * 80 + "\n")
+        for label, metrics in sorted(deltas['per_class'].items()):
+            support = metrics['support']
+            f.write(f"\n{label.upper()} (support: {support}):\n")
+            for metric_name in ['f1', 'precision', 'recall']:
+                metric = metrics[metric_name]
+                f.write(f"  {metric_name.capitalize():<12} Baseline: {metric['baseline']:>6.4f}  "
+                       f"Agentic: {metric['agentic']:>6.4f}  Change: {metric['absolute']:>+7.4f}\n")
+        f.write("\n")
+        
+        # Detailed metrics breakdown
+        f.write("DETAILED METRICS BREAKDOWN\n")
+        f.write("-" * 80 + "\n")
+        f.write(f"Baseline Metrics:\n")
+        f.write(f"  Accuracy: {baseline_metrics.get('accuracy', 0):.4f}\n")
+        f.write(f"  FPR: {baseline_metrics.get('fpr', 0):.4f}\n")
+        f.write(f"  Precision (macro): {baseline_metrics.get('precision_macro', 0):.4f}\n")
+        f.write(f"  Recall (macro): {baseline_metrics.get('recall_macro', 0):.4f}\n")
+        f.write(f"  F1 (macro): {baseline_metrics.get('f1_macro', 0):.4f}\n")
+        f.write("\n")
+        
+        f.write(f"Agentic Metrics:\n")
+        f.write(f"  Accuracy: {agentic_metrics.get('accuracy', 0):.4f}\n")
+        f.write(f"  FPR: {agentic_metrics.get('fpr', 0):.4f}\n")
+        f.write(f"  Precision (macro): {agentic_metrics.get('precision_macro', 0):.4f}\n")
+        f.write(f"  Recall (macro): {agentic_metrics.get('recall_macro', 0):.4f}\n")
+        f.write(f"  F1 (macro): {agentic_metrics.get('f1_macro', 0):.4f}\n")
+        f.write("\n")
+        
+        f.write("=" * 80 + "\n")
+        f.write("END OF REPORT\n")
+        f.write("=" * 80 + "\n")
+    
+    print(f"Saved comprehensive text report to: {output_path}")
+
+
 def find_latest_run(experiments_dir: Path, method: str, split: str) -> Optional[Path]:
     """Find the latest run directory for a method and split."""
     if not experiments_dir.exists():
@@ -298,6 +446,8 @@ def main():
     
     # Save reports
     output_dir.mkdir(parents=True, exist_ok=True)
+    results_dir = (project_root / "results").resolve()
+    results_dir.mkdir(parents=True, exist_ok=True)
     timestamp = datetime.now().strftime("%Y%m%d_%H%M%S")
     
     csv_path = output_dir / f"comparison_{args.split}_{timestamp}.csv"
@@ -318,6 +468,20 @@ def main():
             'deltas': deltas
         }, f, indent=2, default=lambda o: o.tolist() if hasattr(o, 'tolist') else o)
     print(f"Saved comparison JSON to: {json_path}")
+    
+    # Save comprehensive text report in results/ folder
+    baseline_preds_path = baseline_run_dir / f"preds_{args.split}.jsonl"
+    agentic_preds_path = agentic_run_dir / f"preds_{args.split}.jsonl"
+    baseline_time = baseline_metrics.get('inference_time')
+    agentic_time = agentic_metrics.get('inference_time')
+    
+    txt_path = results_dir / f"comparison_report_{args.split}_{timestamp}.txt"
+    save_comprehensive_txt_report(
+        deltas, baseline_metrics, agentic_metrics,
+        txt_path, args.split, baseline_run_dir.name, agentic_run_dir.name,
+        baseline_preds_path, agentic_preds_path,
+        baseline_time, agentic_time
+    )
     
     print("\n" + "=" * 80)
     print("✅ Comparison Complete")
