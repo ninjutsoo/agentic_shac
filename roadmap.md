@@ -66,6 +66,7 @@ agentic_shac/
 │       ├── run_baseline.py
 │       ├── run_agentic.py
 │       ├── compare_runs.py
+│       ├── run_full_comparison.py
 │       └── plots.py
 ├── tests/                      # 🧪 Automated tests
 │   ├── unit/                   # Unit tests (pytest)
@@ -787,15 +788,30 @@ ablation:
 - Handle errors gracefully with fallback to baseline
 
 ##### 2. Comparison Tool (`src/evaluation/compare_runs.py`)
-- Load baseline vs agentic predictions
-- Compute metrics:
-  - FPR deltas (absolute and relative)
-  - Accuracy deltas (per split and overall)
-  - Per-class performance
-- Output CSV and Markdown summary to `experiments/reports/`
-- Generate statistical significance tests
+- Load baseline vs agentic predictions/metrics from JSON files
+- Compute comprehensive deltas:
+  - FPR deltas (absolute and relative %)
+  - Accuracy deltas (absolute and relative %)
+  - Per-class performance (F1, precision, recall)
+- Auto-find latest runs or accept specific run directories
+- Output multiple formats:
+  - CSV: Detailed metrics table (`experiments/reports/comparison_*.csv`)
+  - Markdown: Formatted report with tables (`experiments/reports/comparison_*.md`)
+  - JSON: Structured data for programmatic use (`experiments/reports/comparison_*.json`)
+- Highlight FPR improvements (primary metric)
+- Print detailed comparison report to console
 
-##### 3. Visualization (`src/evaluation/plots.py`)
+##### 3. Full Comparison Runner (`src/evaluation/run_full_comparison.py`)
+- Orchestrates complete comparison pipeline:
+  1. Run baseline on full dev/test splits
+  2. Run agentic on full dev/test splits
+  3. Automatically compare results
+  4. Generate comprehensive comparison reports
+- Supports skipping steps (e.g., if baseline already run)
+- Provides big batch quantitative comparison
+- Usage: `python -m src.evaluation.run_full_comparison --split dev test`
+
+##### 4. Visualization (`src/evaluation/plots.py`)
 - Matplotlib bar plots for FPR by configuration
 - Confusion matrix heatmaps
 - Per-class performance comparisons
@@ -1250,17 +1266,25 @@ python -m src.evaluation.run_agentic --split dev
 
 #### Phase 4: Analysis (Days 13-15)
 ```bash
-# 1. Implement: src/evaluation/{compare_runs.py, plots.py}
-# 2. Run: notebooks/13_compare_baseline_vs_agentic.ipynb
-# ✅ Side-by-side comparison
+# 1. Implement: src/evaluation/{compare_runs.py, run_full_comparison.py, plots.py}
+# 2. Run full comparison on dev/test splits
+python -m src.evaluation.run_full_comparison --split dev test
+# ✅ Generates comprehensive comparison reports (CSV, Markdown, JSON)
 
-# 3. Run: notebooks/14_fpr_analysis.ipynb
+# 3. Or compare existing runs manually
+python -m src.evaluation.compare_runs --split dev
+python -m src.evaluation.compare_runs --split test
+
+# 4. Run: notebooks/13_compare_baseline_vs_agentic.ipynb
+# ✅ Side-by-side comparison on samples
+
+# 5. Run: notebooks/14_fpr_analysis.ipynb
 # ✅ Analyze FPR reduction
 
-# 4. Run: notebooks/15_error_analysis.ipynb
+# 6. Run: notebooks/15_error_analysis.ipynb
 # ✅ Categorize errors
 
-# 5. Run: notebooks/16_ablation_study.ipynb
+# 7. Run: notebooks/16_ablation_study.ipynb
 # ✅ Understand component contributions
 ```
 
