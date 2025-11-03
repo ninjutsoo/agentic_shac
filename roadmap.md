@@ -607,10 +607,24 @@ ablation:
   full_triad: true
 ```
 
-##### 9. Unit Tests (`tests/test_agentic_pipeline.py`)
+##### 9. Integration Tests
+
+**Basic Functionality Test** (`tests/integration/phase3_test_agentic_pipeline.py`):
 - Fixture: 3 tiny notes covering each class
 - Assert pipeline returns one of `a|b|c|d` for each
 - Snapshot JSON of results for regression testing
+
+**Performance Comparison Test** (`tests/integration/phase3_test_agentic_vs_baseline.py`):
+- Load 20-50 samples from dev set (average batch size)
+- Run baseline on same samples
+- Run agentic pipeline on same samples
+- Compare metrics:
+  - FPR (primary metric - should be lower for agentic)
+  - Accuracy (should remain competitive, within 5% of baseline)
+  - Per-class performance
+- Assert agentic FPR < baseline FPR (or at least not significantly worse)
+- Assert agentic accuracy within acceptable range of baseline
+- Exit with error if agentic performance is worse than expected
 
 #### Test Notebooks
 
