@@ -1321,8 +1321,11 @@ python -m src.evaluation.run_baseline --split dev --split test
 # 3. Run agentic pipeline
 python -m src.evaluation.run_agentic --split dev --split test
 
-# 4. Compare and generate report
-python -m src.evaluation.compare_runs \
+# 4. Compare and generate comprehensive reports (recommended - runs everything)
+python -m src.evaluation.run_full_comparison --split dev test
+
+# Or compare existing runs manually:
+# python -m src.evaluation.compare_runs \
     --baseline experiments/baseline \
     --agentic experiments/agentic \
     --output experiments/reports/
