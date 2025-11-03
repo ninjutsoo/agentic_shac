@@ -89,6 +89,33 @@ agentic_shac/
 
 ## Design Principles
 
+### Code Structure & Cleanliness
+
+**Repository Organization:**
+- All code must follow the repository structure defined above
+- New files must be placed in appropriate directories (src/, tests/, notebooks/, scripts/)
+- No accidental files should be committed (check `.gitignore` before committing)
+
+**File Naming:**
+- Use descriptive, lowercase names with underscores (e.g., `test_metrics.py`, not `testMetrics.py` or `test-metrics.py`)
+- Avoid special characters in filenames (especially `=`, `>`, `<`, `|` which can be created by command redirection errors)
+- All files must have clear purpose documented in roadmap
+
+**Git Hygiene:**
+- Always review `git status` before committing
+- Check for accidental files (files with weird names like `=0.17`, `=10`, etc.)
+- Use `.gitignore` to prevent committing:
+  - Build artifacts (`__pycache__/`, `*.pyc`, `*.egg-info/`)
+  - Accidental files from command errors (`=*`, `>`, `<`, etc.)
+  - Experiment outputs that shouldn't be versioned (check `experiments/` patterns)
+- Before pushing, verify all changes align with roadmap structure
+
+**Code Quality:**
+- Follow existing code patterns and structure
+- Update roadmap when adding new files or major changes
+- Keep code clean and well-documented
+- Remove temporary files and unused code
+
 ### Model Selection
 - **Primary Model**: Llama-3.1-8B-Instruct
 - **Rationale**: Instruction-strong, fits available GPUs (bf16 on 32GB; 4-bit on 24GB)
