@@ -1,0 +1,19 @@
+model_name: meta-llama/Llama-3.1-8B-Instruct
+dtype: bf16
+load_in_4bit: false
+batch_size: 8
+max_new_tokens: 8
+temperature: 0.1
+top_p: 0.9
+prompts:
+  proposer: "proposer_v1"
+  refuter: "refuter_v1"
+  judge: "judge_v1"
+sectionizer:
+  use_sections: ["assessment_plan", "problems", "meds", "labs"]
+  mask_trigger_sentence: true
+ablation:
+  proposer_only: false
+  proposer_refuter: false
+  full_triad: true
+
