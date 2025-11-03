@@ -1,0 +1,118 @@
+{
+  "config": {
+    "model_name": "meta-llama/Llama-3.1-8B-Instruct",
+    "dtype": "bf16",
+    "load_in_4bit": false,
+    "batch_size": 8,
+    "max_new_tokens": 8,
+    "temperature": 0.1,
+    "top_p": 0.9,
+    "prompts": {
+      "proposer": "proposer_v1",
+      "refuter": "refuter_v1",
+      "judge": "judge_v1"
+    },
+    "sectionizer": {
+      "use_sections": [
+        "assessment_plan",
+        "problems",
+        "meds",
+        "labs"
+      ],
+      "mask_trigger_sentence": true
+    },
+    "ablation": {
+      "proposer_only": false,
+      "proposer_refuter": false,
+      "full_triad": true
+    }
+  },
+  "samples": [
+    {
+      "id": "test_001",
+      "text": "Patient denies cocaine use. Assessment: No evidence of substance abuse.",
+      "trigger_text": "cocaine",
+      "status_label": "none"
+    },
+    {
+      "id": "test_002",
+      "text": "Patient reports daily cocaine use. Assessment: Active substance abuse. Plan: Refer to addiction services.",
+      "trigger_text": "cocaine",
+      "status_label": "current"
+    },
+    {
+      "id": "test_003",
+      "text": "Patient has history of cocaine use but has been clean for 2 years. Assessment: Past substance abuse, currently in remission.",
+      "trigger_text": "cocaine",
+      "status_label": "past"
+    }
+  ],
+  "results": [
+    {
+      "id": "test_001",
+      "text": "Patient denies cocaine use. Assessment: No evidence of substance abuse.",
+      "trigger_text": "cocaine",
+      "status_label": "none",
+      "masked_note": "Assessment: No evidence of substance abuse.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Patient denies cocaine use. Assessment: No evidence of substance abuse."
+      },
+      "proposer_letter": "b",
+      "proposer_masked_letter": "a",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "test_002",
+      "text": "Patient reports daily cocaine use. Assessment: Active substance abuse. Plan: Refer to addiction services.",
+      "trigger_text": "cocaine",
+      "status_label": "current",
+      "masked_note": "Assessment: Active substance abuse. Plan: Refer to addiction services.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Patient reports daily cocaine use. Assessment: Active substance abuse. Plan: Refer to addiction services."
+      },
+      "proposer_letter": "b",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "test_003",
+      "text": "Patient has history of cocaine use but has been clean for 2 years. Assessment: Past substance abuse, currently in remission.",
+      "trigger_text": "cocaine",
+      "status_label": "past",
+      "masked_note": "Assessment: Past substance abuse, currently in remission.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Patient has history of cocaine use but has been clean for 2 years. Assessment: Past substance abuse, currently in remission."
+      },
+      "proposer_letter": "d",
+      "proposer_masked_letter": "d",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    }
+  ]
+}

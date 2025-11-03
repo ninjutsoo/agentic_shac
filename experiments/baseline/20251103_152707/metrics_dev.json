@@ -1,0 +1,104 @@
+{
+  "accuracy": 0.5389048991354467,
+  "fpr": 0.4851063829787234,
+  "per_class": {
+    "Not Applicable": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 0,
+      "tp": 0,
+      "fp": 18,
+      "fn": 0,
+      "tn": 329
+    },
+    "current": {
+      "precision": 0.8095238095238095,
+      "recall": 0.6538461538461539,
+      "f1": 0.7234042553191489,
+      "support": 78,
+      "tp": 51,
+      "fp": 12,
+      "fn": 27,
+      "tn": 257
+    },
+    "none": {
+      "precision": 0.9814814814814815,
+      "recall": 0.451063829787234,
+      "f1": 0.6180758017492711,
+      "support": 235,
+      "tp": 106,
+      "fp": 2,
+      "fn": 129,
+      "tn": 110
+    },
+    "past": {
+      "precision": 0.189873417721519,
+      "recall": 0.8823529411764706,
+      "f1": 0.3125,
+      "support": 34,
+      "tp": 30,
+      "fp": 128,
+      "fn": 4,
+      "tn": 185
+    }
+  },
+  "confusion_matrix": {
+    "matrix": [
+      [
+        0,
+        0,
+        0,
+        0
+      ],
+      [
+        1,
+        51,
+        0,
+        26
+      ],
+      [
+        15,
+        12,
+        106,
+        102
+      ],
+      [
+        2,
+        0,
+        2,
+        30
+      ]
+    ],
+    "labels": [
+      "Not Applicable",
+      "current",
+      "none",
+      "past"
+    ],
+    "label_to_idx": {
+      "Not Applicable": 0,
+      "current": 1,
+      "none": 2,
+      "past": 3
+    }
+  },
+  "true_distribution": {
+    "none": 235,
+    "current": 78,
+    "past": 34
+  },
+  "pred_distribution": {
+    "none": 108,
+    "Not Applicable": 18,
+    "past": 158,
+    "current": 63
+  },
+  "n_samples": 347,
+  "labels": [
+    "Not Applicable",
+    "current",
+    "none",
+    "past"
+  ]
+}

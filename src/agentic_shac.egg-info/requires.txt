@@ -1,0 +1,12 @@
+pandas
+numpy
+pyyaml
+tqdm
+torch>=2.0
+transformers>=4.30
+accelerate
+
+[dev]
+pytest
+jupyter
+ipykernel

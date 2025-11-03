@@ -1,0 +1,538 @@
+{
+  "baseline_metrics": {
+    "accuracy": 0.3333333333333333,
+    "fpr": 0.42857142857142855,
+    "per_class": {
+      "Not Applicable": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0,
+        "tp": 0,
+        "fp": 7,
+        "fn": 0,
+        "tn": 23
+      },
+      "current": {
+        "precision": 1.0,
+        "recall": 0.16666666666666666,
+        "f1": 0.2857142857142857,
+        "support": 6,
+        "tp": 1,
+        "fp": 0,
+        "fn": 5,
+        "tn": 24
+      },
+      "none": {
+        "precision": 1.0,
+        "recall": 0.2857142857142857,
+        "f1": 0.4444444444444445,
+        "support": 21,
+        "tp": 6,
+        "fp": 0,
+        "fn": 15,
+        "tn": 9
+      },
+      "past": {
+        "precision": 0.1875,
+        "recall": 1.0,
+        "f1": 0.3157894736842105,
+        "support": 3,
+        "tp": 3,
+        "fp": 13,
+        "fn": 0,
+        "tn": 14
+      }
+    },
+    "confusion_matrix": {
+      "matrix": "[[0 0 0 0]\n [1 1 0 4]\n [6 0 6 9]\n [0 0 0 3]]",
+      "labels": [
+        "Not Applicable",
+        "current",
+        "none",
+        "past"
+      ],
+      "label_to_idx": {
+        "Not Applicable": 0,
+        "current": 1,
+        "none": 2,
+        "past": 3
+      }
+    },
+    "true_distribution": {
+      "none": 21,
+      "current": 6,
+      "past": 3
+    },
+    "pred_distribution": {
+      "none": 6,
+      "Not Applicable": 7,
+      "past": 16,
+      "current": 1
+    },
+    "n_samples": 30,
+    "labels": [
+      "Not Applicable",
+      "current",
+      "none",
+      "past"
+    ]
+  },
+  "agentic_metrics": {
+    "accuracy": 0.7,
+    "fpr": 0.0,
+    "per_class": {
+      "Not Applicable": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 0,
+        "tp": 0,
+        "fp": 0,
+        "fn": 0,
+        "tn": 30
+      },
+      "current": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 6,
+        "tp": 0,
+        "fp": 0,
+        "fn": 6,
+        "tn": 24
+      },
+      "none": {
+        "precision": 0.7,
+        "recall": 1.0,
+        "f1": 0.8235294117647058,
+        "support": 21,
+        "tp": 21,
+        "fp": 9,
+        "fn": 0,
+        "tn": 0
+      },
+      "past": {
+        "precision": 0.0,
+        "recall": 0.0,
+        "f1": 0.0,
+        "support": 3,
+        "tp": 0,
+        "fp": 0,
+        "fn": 3,
+        "tn": 27
+      }
+    },
+    "confusion_matrix": {
+      "matrix": "[[ 0  0  0  0]\n [ 0  0  6  0]\n [ 0  0 21  0]\n [ 0  0  3  0]]",
+      "labels": [
+        "Not Applicable",
+        "current",
+        "none",
+        "past"
+      ],
+      "label_to_idx": {
+        "Not Applicable": 0,
+        "current": 1,
+        "none": 2,
+        "past": 3
+      }
+    },
+    "true_distribution": {
+      "none": 21,
+      "current": 6,
+      "past": 3
+    },
+    "pred_distribution": {
+      "none": 30
+    },
+    "n_samples": 30,
+    "labels": [
+      "Not Applicable",
+      "current",
+      "none",
+      "past"
+    ]
+  },
+  "comparison": {
+    "accuracy_diff": 0.36666666666666664,
+    "accuracy_pct_change": 110.00000000000001,
+    "fpr_diff": -0.42857142857142855,
+    "fpr_pct_change": -100.0,
+    "samples_tested": 30
+  },
+  "baseline_predictions": [
+    {
+      "id": "m_dev_0403_drug_E3",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0403",
+      "text": "SOCIAL HISTORY: Lives with his caring and devoted parents at home. Enjoys movies and computers. No history of alcohol, tobacco or drug use.",
+      "trigger_text": "drug use",
+      "status_label": "none",
+      "pred_letter": "a",
+      "pred_label": "none",
+      "raw_output": " patient\n\nAnswer:assistant\n\nBased on the note, the correct classification is:\n\n(a) none - denies use"
+    },
+    {
+      "id": "m_dev_0419_drug_E3",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0419",
+      "text": "Social History: No tob, EtOH, illicits, from [**Location (un) 3146**], living at home. He was a former clerk/supervisor but is currently on disability. Has familiy that lives nearby.",
+      "trigger_text": "illicits",
+      "status_label": "none",
+      "pred_letter": "d",
+      "pred_label": "Not Applicable",
+      "raw_output": "t patient\n\nAnswer:assistant\n\nBased on the note, I would classify the patient's drug use status as:\n\n"
+    },
+    {
+      "id": "m_dev_0430_drug_E2",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0430",
+      "text": "Social History: +ETOH +Cocaine",
+      "trigger_text": "Cocaine",
+      "status_label": "current",
+      "pred_letter": "c",
+      "pred_label": "past",
+      "raw_output": "ut patient\n\nAnswer:assistant\n\nBased on the note, the classification would be:\n\n(c) past - history of"
+    },
+    {
+      "id": "m_dev_0446_drug_E3",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0446",
+      "text": "Social History: No smoking History of ETOH abuse, 40 days sober Crack Cocaine abuse, 40 days sober",
+      "trigger_text": "Crack Cocaine abuse",
+      "status_label": "past",
+      "pred_letter": "c",
+      "pred_label": "past",
+      "raw_output": "ut patient\n\nAnswer:assistant\n\nBased on the note, the classification would be:\n\n(c) past - history of"
+    },
+    {
+      "id": "m_dev_0447_drug_E2",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0447",
+      "text": "Social History: She was smoking 1 pack of cigarettes per week for 4 years. She does not drink alcohol or use illicit drugs. Her brother lives in the city near her and a son lives in [**Name (NI) 4444**], MA.",
+      "trigger_text": "illicit drugs",
+      "status_label": "none",
+      "pred_letter": "c",
+      "pred_label": "past",
+      "raw_output": "t\n\nAnswer:assistant\n\nBased on the clinical notes, the correct classification is:\n\n(c) past - history"
+    },
+    {
+      "id": "m_dev_0457_drug_E4",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0457",
+      "text": "Social History: Lives on cape with wife, no kids, previous heavy etoh(vodka), sober since [**3-9**], no other drugs or smoking. Worked as a chef.",
+      "trigger_text": "other drugs",
+      "status_label": "none",
+      "pred_letter": "c",
+      "pred_label": "past",
+      "raw_output": "ut patient\n\nAnswer:assistant\n\nBased on the note, the classification would be:\n\n(c) past - history of"
+    },
+    {
+      "id": "m_dev_0460_drug_E6",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0460",
+      "text": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol. Smokes marijuana, denies other drugs.",
+      "trigger_text": "marijuana",
+      "status_label": "current",
+      "pred_letter": "b",
+      "pred_label": "current",
+      "raw_output": "ent\n\nAnswer:assistant\n\nBased on the note, the classification would be:\n\n(b) current - currently uses"
+    },
+    {
+      "id": "m_dev_0460_drug_E7",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0460",
+      "text": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol. Smokes marijuana, denies other drugs.",
+      "trigger_text": "other drugs",
+      "status_label": "none",
+      "pred_letter": "c",
+      "pred_label": "past",
+      "raw_output": "ut patient\n\nAnswer:assistant\n\nBased on the note, the classification would be:\n\n(c) past - history of"
+    },
+    {
+      "id": "m_dev_0467_drug_E6",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0467",
+      "text": "Social History: Patient lives in [**Location 32944**] with girlfriend and son. [**Name (NI) **] works as a machine operator. Patient drinks anywhere from 1-5 beers as well as vodka shots daily. He has never smoked or used illicit drugs.",
+      "trigger_text": "illicit drugs",
+      "status_label": "none",
+      "pred_letter": "d",
+      "pred_label": "Not Applicable",
+      "raw_output": "nt\n\nAnswer:assistant\n\nBased on the clinical notes, I would classify the patient's drug use status as"
+    },
+    {
+      "id": "m_dev_0470_drug_E5",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0470",
+      "text": "Social History: Lives with: Lives alone. High stress due to laid off [**12-23**] from job at [**Location (un) 6692**] in cargo. Cigarettes: Tob: 1 ppd x 40+ yrs-- **quit [**2152-9-19**] ETOH: Daily [**4-18**] 12 oz beers most days. **quit [**2152-9-19**] Substance abuse: Past marijuana",
+      "trigger_text": "marijuana",
+      "status_label": "past",
+      "pred_letter": "c",
+      "pred_label": "past",
+      "raw_output": "ent\n\nAnswer:assistant\n\nBased on the clinical notes, the classification would be:\n\n(c) past - history"
+    }
+  ],
+  "agentic_predictions": [
+    {
+      "id": "m_dev_0403_drug_E3",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0403",
+      "text": "SOCIAL HISTORY: Lives with his caring and devoted parents at home. Enjoys movies and computers. No history of alcohol, tobacco or drug use.",
+      "trigger_text": "drug use",
+      "status_label": "none",
+      "masked_note": "SOCIAL HISTORY: Lives with his caring and devoted parents at home. Enjoys movies and computers.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "SOCIAL HISTORY: Lives with his caring and devoted parents at home. Enjoys movies and computers. No history of alcohol, tobacco or drug use."
+      },
+      "proposer_letter": "a",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0419_drug_E3",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0419",
+      "text": "Social History: No tob, EtOH, illicits, from [**Location (un) 3146**], living at home. He was a former clerk/supervisor but is currently on disability. Has familiy that lives nearby.",
+      "trigger_text": "illicits",
+      "status_label": "none",
+      "masked_note": "He was a former clerk/supervisor but is currently on disability. Has familiy that lives nearby.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: No tob, EtOH, illicits, from [**Location (un) 3146**], living at home. He was a former clerk/supervisor but is currently on disability. Has familiy that lives nearby."
+      },
+      "proposer_letter": "b",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0430_drug_E2",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0430",
+      "text": "Social History: +ETOH +Cocaine",
+      "trigger_text": "Cocaine",
+      "status_label": "current",
+      "masked_note": "",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: +ETOH +Cocaine"
+      },
+      "proposer_letter": "b",
+      "proposer_masked_letter": "d",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0446_drug_E3",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0446",
+      "text": "Social History: No smoking History of ETOH abuse, 40 days sober Crack Cocaine abuse, 40 days sober",
+      "trigger_text": "Crack Cocaine abuse",
+      "status_label": "past",
+      "masked_note": "",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: No smoking History of ETOH abuse, 40 days sober Crack Cocaine abuse, 40 days sober"
+      },
+      "proposer_letter": "c",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0447_drug_E2",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0447",
+      "text": "Social History: She was smoking 1 pack of cigarettes per week for 4 years. She does not drink alcohol or use illicit drugs. Her brother lives in the city near her and a son lives in [**Name (NI) 4444**], MA.",
+      "trigger_text": "illicit drugs",
+      "status_label": "none",
+      "masked_note": "Social History: She was smoking 1 pack of cigarettes per week for 4 years. Her brother lives in the city near her and a son lives in [**Name (NI) 4444**], MA.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: She was smoking 1 pack of cigarettes per week for 4 years. She does not drink alcohol or use illicit drugs. Her brother lives in the city near her and a son lives in [**Name (NI) 4444**], MA."
+      },
+      "proposer_letter": "a",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0457_drug_E4",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0457",
+      "text": "Social History: Lives on cape with wife, no kids, previous heavy etoh(vodka), sober since [**3-9**], no other drugs or smoking. Worked as a chef.",
+      "trigger_text": "other drugs",
+      "status_label": "none",
+      "masked_note": "Worked as a chef.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: Lives on cape with wife, no kids, previous heavy etoh(vodka), sober since [**3-9**], no other drugs or smoking. Worked as a chef."
+      },
+      "proposer_letter": "c",
+      "proposer_masked_letter": "d",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0460_drug_E6",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0460",
+      "text": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol. Smokes marijuana, denies other drugs.",
+      "trigger_text": "marijuana",
+      "status_label": "current",
+      "masked_note": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol. Smokes marijuana, denies other drugs."
+      },
+      "proposer_letter": "b",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0460_drug_E7",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0460",
+      "text": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol. Smokes marijuana, denies other drugs.",
+      "trigger_text": "other drugs",
+      "status_label": "none",
+      "masked_note": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: Recently married. He lives with his wife and their dog. No kids. Works as an investment manager. Never smoker. Rare alcohol. Smokes marijuana, denies other drugs."
+      },
+      "proposer_letter": "b",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0467_drug_E6",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0467",
+      "text": "Social History: Patient lives in [**Location 32944**] with girlfriend and son. [**Name (NI) **] works as a machine operator. Patient drinks anywhere from 1-5 beers as well as vodka shots daily. He has never smoked or used illicit drugs.",
+      "trigger_text": "illicit drugs",
+      "status_label": "none",
+      "masked_note": "Social History: Patient lives in [**Location 32944**] with girlfriend and son. [**Name (NI) **] works as a machine operator. Patient drinks anywhere from 1-5 beers as well as vodka shots daily.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: Patient lives in [**Location 32944**] with girlfriend and son. [**Name (NI) **] works as a machine operator. Patient drinks anywhere from 1-5 beers as well as vodka shots daily. He has never smoked or used illicit drugs."
+      },
+      "proposer_letter": "a",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    },
+    {
+      "id": "m_dev_0470_drug_E5",
+      "split": "dev",
+      "source": "mimic",
+      "note_id": "0470",
+      "text": "Social History: Lives with: Lives alone. High stress due to laid off [**12-23**] from job at [**Location (un) 6692**] in cargo. Cigarettes: Tob: 1 ppd x 40+ yrs-- **quit [**2152-9-19**] ETOH: Daily [**4-18**] 12 oz beers most days. **quit [**2152-9-19**] Substance abuse: Past marijuana",
+      "trigger_text": "marijuana",
+      "status_label": "past",
+      "masked_note": "Social History: Lives with: Lives alone. High stress due to laid off [**12-23**] from job at [**Location (un) 6692**] in cargo. Cigarettes: Tob: 1 ppd x 40+ yrs-- **quit [**2152-9-19**] ETOH: Daily [**4-18**] 12 oz beers most days.",
+      "non_cue_text": "",
+      "sections": {
+        "assessment_plan": "",
+        "problems": "",
+        "meds": "",
+        "labs": "",
+        "other": "Social History: Lives with: Lives alone. High stress due to laid off [**12-23**] from job at [**Location (un) 6692**] in cargo. Cigarettes: Tob: 1 ppd x 40+ yrs-- **quit [**2152-9-19**] ETOH: Daily [**4-18**] 12 oz beers most days. **quit [**2152-9-19**] Substance abuse: Past marijuana"
+      },
+      "proposer_letter": "c",
+      "proposer_masked_letter": "b",
+      "refuter_letter": "d",
+      "refuter_spans": [],
+      "final_choice": "a",
+      "reason": "decision_rules",
+      "final_label": "none"
+    }
+  ]
+}

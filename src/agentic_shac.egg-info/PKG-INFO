@@ -1,0 +1,16 @@
+Metadata-Version: 2.4
+Name: agentic_shac
+Version: 0.1.0
+Summary: Agentic multi-model system for Drug StatusTime classification in SHAC dataset
+Requires-Python: >=3.10
+Requires-Dist: pandas
+Requires-Dist: numpy
+Requires-Dist: pyyaml
+Requires-Dist: tqdm
+Requires-Dist: torch>=2.0
+Requires-Dist: transformers>=4.30
+Requires-Dist: accelerate
+Provides-Extra: dev
+Requires-Dist: pytest; extra == "dev"
+Requires-Dist: jupyter; extra == "dev"
+Requires-Dist: ipykernel; extra == "dev"

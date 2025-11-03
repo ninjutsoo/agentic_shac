@@ -9,6 +9,12 @@ from transformers import AutoTokenizer, AutoModelForCausalLM
 from typing import List, Dict
 import re
 from tqdm import tqdm
+from src.agentic.prompts import (
+    get_prompt,
+    format_for_llama,
+    parse_model_output as parse_output_from_prompts,
+    letter_to_label as letter_to_label_from_prompts,
+)
 
 
 class LlamaSingleBaseline:
@@ -52,49 +58,20 @@ class LlamaSingleBaseline:
         
         print(f"✅ Model loaded successfully")
         
-    def format_prompt(self, note: str, trigger: str) -> str:
+    def format_prompt(self, note: str) -> str:
         """
         Format prompt using Llama-3.1-Instruct format.
         
         Args:
-            note: Clinical note text
-            trigger: Drug trigger word
+            note: Clinical note text (trigger is implicit in the text)
             
         Returns:
             Formatted prompt string
         """
-        system_msg = (
-            "You are a clinical NLP assistant. Classify temporal drug use status for the PATIENT "
-            "given a clinical note and a highlighted trigger mention. Use ONLY evidence about the patient."
-        )
-        user_msg = f"""Note:
-{note}
-
-Trigger mention: "{trigger}"
-
-Choose exactly ONE option and respond with a single letter in parentheses:
-(a) none            = patient denies use OR there is no evidence about the patient using
-(b) current         = evidence the patient currently/recently uses
-(c) past            = patient used in the past but not currently
-(d) Not Applicable  = trigger not about the patient's drug use status
-
-Decision rules:
-- If the note contains negation about the trigger (e.g., "denies", "(-)", "no", "negative") referring to the patient, choose (a) none.
-- If it says "history of"/"quit"/"clean for X years" without current use, choose (c) past.
-- Mentions about family/others or context not describing the patient's own status → (d) Not Applicable.
-- If the evidence is insufficient to determine none/current/past, choose (d) Not Applicable.
-
-Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
-        
-        # Llama-3.1-Instruct format
-        prompt = f"""<|begin_of_text|><|start_header_id|>system<|end_header_id|>
-
-{system_msg}<|eot_id|><|start_header_id|>user<|end_header_id|>
-
-{user_msg}<|eot_id|><|start_header_id|>assistant<|end_header_id|>
-
-"""
-        return prompt
+        # Use shared prompt templates as specified by roadmap/config
+        template_name = self.config.get('prompt_template', 'status_v1')
+        prompt_dict = get_prompt(template_name, note=note)
+        return format_for_llama(prompt_dict['system'], prompt_dict['user'])
     
     def parse_output(self, generated_text: str) -> str:
         """
@@ -106,17 +83,8 @@ Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
         Returns:
             Parsed letter (a/b/c/d) or None
         """
-        # Find last occurrence of (a), (b), (c), or (d)
-        matches = re.findall(r'\([abcd]\)', generated_text.lower())
-        if matches:
-            return matches[-1][1]  # Extract letter from (x)
-        
-        # Fallback: find first letter
-        for char in generated_text.lower():
-            if char in ['a', 'b', 'c', 'd']:
-                return char
-        
-        return None
+        # Delegate to shared parser for consistency
+        return parse_output_from_prompts(generated_text)
     
     def letter_to_label(self, letter: str) -> str:
         """
@@ -128,13 +96,7 @@ Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
         Returns:
             Status label
         """
-        mapping = {
-            'a': 'none',
-            'b': 'current',
-            'c': 'past',
-            'd': 'Not Applicable'
-        }
-        return mapping.get(letter, 'Not Applicable')
+        return letter_to_label_from_prompts(letter)
     
     def predict_batch(self, samples: List[Dict], show_progress: bool = True) -> List[Dict]:
         """
@@ -154,8 +116,8 @@ Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
         iterator = tqdm(samples) if show_progress else samples
         
         for sample in iterator:
-            # Format prompt
-            prompt = self.format_prompt(sample['text'], sample['trigger_text'])
+            # Format prompt (trigger is implicit in the text)
+            prompt = self.format_prompt(sample['text'])
             
             # Tokenize
             inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
@@ -165,9 +127,9 @@ Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
                 outputs = self.model.generate(
                     **inputs,
                     max_new_tokens=self.config.get('max_new_tokens', 8),
-                    temperature=0.0,
-                    top_p=1.0,
-                    do_sample=False
+                    temperature=self.config.get('temperature', 0.0),
+                    top_p=self.config.get('top_p', 1.0),
+                    do_sample=self.config.get('temperature', 0.0) > 0.0
                 )
             
             # Decode
@@ -186,18 +148,18 @@ Answer STRICTLY as one letter in parentheses: (a) or (b) or (c) or (d)."""
         
         return results
     
-    def predict_single(self, text: str, trigger: str) -> Dict:
+    def predict_single(self, text: str, trigger: str = None) -> Dict:
         """
         Run inference on a single sample.
         
         Args:
-            text: Clinical note text
-            trigger: Drug trigger word
+            text: Clinical note text (trigger is implicit in the text)
+            trigger: Drug trigger word (not used in prompts, kept for compatibility)
             
         Returns:
             Prediction dict with letter and label
         """
-        sample = {'text': text, 'trigger_text': trigger}
+        sample = {'text': text, 'trigger_text': trigger or ''}
         results = self.predict_batch([sample], show_progress=False)
         return results[0]
 

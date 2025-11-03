@@ -14,7 +14,6 @@ PROMPTS = {
         "user_template": """Note:
 {note}
 
-Drug trigger: "{trigger}"
 Options: (a) none (b) current (c) past (d) Not Applicable
 Answer with one letter."""
     },
@@ -22,8 +21,6 @@ Answer with one letter."""
         "system": "You are a clinical NLP assistant. Classify temporal drug use status for the PATIENT only.",
         "user_template": """Note:
 {note}
-
-Trigger mention: "{trigger}"
 
 Choose EXACTLY ONE letter:
 (a) none            = patient denies use OR no evidence about patient using
@@ -44,8 +41,6 @@ Answer with ONE letter only: a or b or c or d."""
         "user_template": """Note:
 {note}
 
-Trigger: "{trigger}"
-
 Classify patient's drug use status:
 (a) none - denies use or no evidence
 (b) current - currently uses
@@ -59,7 +54,6 @@ Answer:"""
         "user_template": """Note:
 {note}
 
-Drug trigger: "{trigger}"
 Options: (a) none (b) current (c) past (d) Not Applicable
 Answer with one letter only."""
     },

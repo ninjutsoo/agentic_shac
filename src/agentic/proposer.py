@@ -67,9 +67,9 @@ class ProposerAgent:
         Run Proposer on a single sample.
         
         Args:
-            note: Full clinical note text
-            trigger: Drug trigger word
-            masked_note: Masked note (if None, will be computed from note)
+            note: Full clinical note text (trigger is implicit in the text)
+            trigger: Drug trigger word (used for sectionizer/masking, not in prompts)
+            masked_note: Masked note (if None, will be computed from note using trigger)
             
         Returns:
             Dictionary with proposer_letter and proposer_masked_letter
@@ -80,8 +80,8 @@ class ProposerAgent:
         # Get prompt template
         prompt_template = self.config.get('prompts', {}).get('proposer', 'proposer_v1')
         
-        # Run on full note
-        prompt_dict = get_prompt(prompt_template, note=note, trigger=trigger)
+        # Run on full note (trigger is implicit in the text)
+        prompt_dict = get_prompt(prompt_template, note=note)
         prompt = format_for_llama(prompt_dict['system'], prompt_dict['user'])
         
         inputs = self.tokenizer(prompt, return_tensors="pt").to(self.model.device)
@@ -98,11 +98,11 @@ class ProposerAgent:
         generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
         proposer_letter = parse_model_output(generated_text)
         
-        # Run on masked note
+        # Run on masked note (trigger is implicit in the text)
         if masked_note is None:
             masked_note = note  # Fallback if not provided
         
-        prompt_dict_masked = get_prompt(prompt_template, note=masked_note, trigger=trigger)
+        prompt_dict_masked = get_prompt(prompt_template, note=masked_note)
         prompt_masked = format_for_llama(prompt_dict_masked['system'], prompt_dict_masked['user'])
         
         inputs_masked = self.tokenizer(prompt_masked, return_tensors="pt").to(self.model.device)

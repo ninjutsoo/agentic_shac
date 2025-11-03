@@ -1,0 +1,101 @@
+{
+  "accuracy": 0.09798270893371758,
+  "fpr": 1.0,
+  "per_class": {
+    "none": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 235,
+      "tp": 0,
+      "fp": 0,
+      "fn": 235,
+      "tn": 112
+    },
+    "current": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 78,
+      "tp": 0,
+      "fp": 0,
+      "fn": 78,
+      "tn": 269
+    },
+    "past": {
+      "precision": 0.09798270893371758,
+      "recall": 1.0,
+      "f1": 0.1784776902887139,
+      "support": 34,
+      "tp": 34,
+      "fp": 313,
+      "fn": 0,
+      "tn": 0
+    },
+    "Not Applicable": {
+      "precision": 0.0,
+      "recall": 0.0,
+      "f1": 0.0,
+      "support": 0,
+      "tp": 0,
+      "fp": 0,
+      "fn": 0,
+      "tn": 347
+    }
+  },
+  "confusion_matrix": {
+    "matrix": [
+      [
+        0,
+        0,
+        235,
+        0
+      ],
+      [
+        0,
+        0,
+        78,
+        0
+      ],
+      [
+        0,
+        0,
+        34,
+        0
+      ],
+      [
+        0,
+        0,
+        0,
+        0
+      ]
+    ],
+    "labels": [
+      "none",
+      "current",
+      "past",
+      "Not Applicable"
+    ],
+    "label_to_idx": {
+      "none": 0,
+      "current": 1,
+      "past": 2,
+      "Not Applicable": 3
+    }
+  },
+  "true_distribution": {
+    "none": 235,
+    "current": 78,
+    "past": 34
+  },
+  "pred_distribution": {
+    "past": 347
+  },
+  "n_samples": 347,
+  "labels": [
+    "none",
+    "current",
+    "past",
+    "Not Applicable"
+  ]
+}
