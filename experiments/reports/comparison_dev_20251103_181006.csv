@@ -1,0 +1,17 @@
+Metric,Baseline,Agentic,Absolute Change,Relative Change (%)
+Accuracy,0.3631,0.4092,+0.0461,+12.70
+FPR,0.4766,0.4298,-0.0468,-9.82
+
+Class,Metric,Baseline,Agentic,Absolute Change,Support
+Not Applicable,f1,0.0000,0.0000,+0.0000,0
+Not Applicable,precision,0.0000,0.0000,+0.0000,0
+Not Applicable,recall,0.0000,0.0000,+0.0000,0
+current,f1,0.3673,0.5571,+0.1897,78
+current,precision,0.9000,0.4326,-0.4674,78
+current,recall,0.2308,0.7821,+0.5513,78
+none,f1,0.5110,0.4525,-0.0586,235
+none,precision,0.9878,0.9857,-0.0021,235
+none,recall,0.3447,0.2936,-0.0511,235
+past,f1,0.2634,0.2824,+0.0189,34
+past,precision,0.1579,0.2353,+0.0774,34
+past,recall,0.7941,0.3529,-0.4412,34

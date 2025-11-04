@@ -102,11 +102,16 @@ class RefuterAgent:
         # Get prompt template
         prompt_template = self.config.get('prompts', {}).get('refuter', 'refuter_v1')
         
+        # Get proposer label for better prompt
+        from src.agentic.prompts import letter_to_label
+        proposer_label = letter_to_label(proposer_letter) if proposer_letter else "unknown"
+        
         # Format prompt
         prompt_dict = get_prompt(
             prompt_template,
             non_cue_text=non_cue_text,
-            proposer_letter=proposer_letter
+            proposer_letter=proposer_letter,
+            proposer_label=proposer_label
         )
         prompt = format_for_llama(prompt_dict['system'], prompt_dict['user'])
         
@@ -122,17 +127,24 @@ class RefuterAgent:
                 do_sample=self.config.get('temperature', 0.1) > 0.0
             )
         
-        generated_text = self.tokenizer.decode(outputs[0], skip_special_tokens=True)
+        # Decode only new tokens (generated part, not the full prompt)
+        input_length = inputs['input_ids'].shape[1]
+        generated_ids = outputs[0][input_length:]
+        generated_text = self.tokenizer.decode(generated_ids, skip_special_tokens=True).strip()
+        
+        # This should be just the assistant's response
+        raw_output = generated_text
         
         # Parse output
-        refuter_letter, raw_spans = parse_refuter_output(generated_text)
+        refuter_letter, raw_spans = parse_refuter_output(raw_output)
         
         # Validate spans
         validated_spans = self.validate_spans(raw_spans, non_cue_text)
         
         return {
             'refuter_letter': refuter_letter,
-            'refuter_spans': validated_spans
+            'refuter_spans': validated_spans,
+            'raw_output': raw_output  # Include raw output for debugging
         }
     
     def predict_batch(self, samples: List[Dict], show_progress: bool = True) -> List[Dict]:

@@ -69,6 +69,7 @@ class JudgeAgent:
         Apply decision rules to determine final choice.
         
         Rules:
+        0) If Refuter spans contain negations (no, denies, never, none), override to (a) none.
         1) Prefer the letter supported by Refuter spans.
         2) If spans give no support, choose (a) none.
         3) If Proposer flips on masked note and Refuter stays stable, prefer Refuter.
@@ -87,6 +88,43 @@ class JudgeAgent:
         has_valid_spans = any(span and span.strip() for span in refuter_spans)
         non_cue_lower = non_cue_text.lower() if non_cue_text else ""
         
+        # Rule 0: Negation detection - if spans contain negations, override to (a) none
+        if has_valid_spans:
+            negation_keywords = ['no ', 'no,', 'denies', 'never', 'not ', 'sober since', 'quit', 'clean', 'denied', 'does not']
+            spans_text = " ".join(refuter_spans).lower()
+            
+            # Check if any span contains negation keywords
+            # Match whole words or phrases, not substrings
+            has_negation = False
+            for keyword in negation_keywords:
+                keyword_lower = keyword.lower()
+                # Check if keyword appears as a standalone word/phrase
+                if keyword_lower in spans_text:
+                    # Additional check: make sure it's not part of another word
+                    # For multi-word keywords, simple substring check is fine
+                    if len(keyword.split()) > 1:
+                        # Multi-word phrase - substring match is sufficient
+                        has_negation = True
+                        break
+                    else:
+                        # Single word - check word boundaries
+                        # Check if keyword is at start, end, or surrounded by space/punctuation
+                        if (spans_text.startswith(keyword_lower) or
+                            spans_text.endswith(keyword_lower) or
+                            f' {keyword_lower} ' in spans_text or
+                            f' {keyword_lower},' in spans_text or
+                            f' {keyword_lower}.' in spans_text or
+                            f',{keyword_lower} ' in spans_text or
+                            f'.{keyword_lower} ' in spans_text):
+                            has_negation = True
+                            break
+            
+            # If spans explicitly contain negations about the patient, override to (a) none
+            # This is a sanity check - if refuter says "c" but cites "no illicit drugs", that's wrong
+            if has_negation:
+                # Spans have negations - override to (a) regardless of refuter's choice
+                return 'a'
+        
         # Rule 1: Prefer the letter supported by Refuter spans (if spans exist and are valid)
         if refuter_letter and refuter_letter in ['a', 'b', 'c', 'd'] and has_valid_spans:
             # Check if spans actually exist in non_cue_text
@@ -94,11 +132,13 @@ class JudgeAgent:
                 return refuter_letter
         
         # Rule 3: If Proposer flips on masked note and Refuter stays stable, prefer Refuter
+        # BUT only if Refuter has evidence (spans) - otherwise ignore Refuter
         # "Refuter stays stable" means Refuter didn't agree with the flipped proposer
         if (proposer_letter and proposer_masked_letter and 
             proposer_letter != proposer_masked_letter and
             refuter_letter and refuter_letter in ['a', 'b', 'c', 'd'] and
-            refuter_letter != proposer_masked_letter):
+            refuter_letter != proposer_masked_letter and
+            has_valid_spans):  # Only use Refuter if it has evidence
             # Proposer flipped, Refuter stable (didn't follow the flip) -> prefer Refuter
             return refuter_letter
         
@@ -106,8 +146,10 @@ class JudgeAgent:
         if proposer_letter and proposer_letter in ['a', 'b', 'c', 'd']:
             return proposer_letter
         
-        # Fallback to refuter letter if valid (but only if proposer unavailable)
-        if refuter_letter and refuter_letter in ['a', 'b', 'c', 'd']:
+        # Fallback to refuter letter if valid AND has evidence (but only if proposer unavailable)
+        # Ignore Refuter if it has no spans (it's likely just defaulting to 'd')
+        if (refuter_letter and refuter_letter in ['a', 'b', 'c', 'd'] and 
+            has_valid_spans and not proposer_letter):
             return refuter_letter
         
         # Rule 2: If spans give no support AND we have no other evidence, choose (a) none

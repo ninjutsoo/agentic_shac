@@ -324,9 +324,11 @@ class AgenticPipeline:
                     # Validate letter
                     if self.validate_letter(refuter_letter):
                         # Cache the result
+                        raw_output = prediction.get('raw_output', '')
                         self._set_cache(cache_key, json.dumps({
                             'refuter_letter': refuter_letter,
-                            'refuter_spans': refuter_spans
+                            'refuter_spans': refuter_spans,
+                            'raw_output': raw_output
                         }))
                         break
                 except Exception as e:

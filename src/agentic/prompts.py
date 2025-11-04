@@ -62,9 +62,17 @@ Answer with one letter only."""
         "user_template": """Non-cue text:
 {non_cue_text}
 
-Proposer chose: {proposer_letter}
-Argue for the opposite letter if supported by non-cue text.
+Proposer chose: {proposer_letter} ({proposer_label})
+Using ONLY non-cue text, choose the best-supported label.
 Options: (a) none (b) current (c) past (d) Not Applicable
+
+Rules:
+- If non-cue text contains negations (no, denies, never, none), choose (a).
+- If non-cue text shows past use without current use, choose (c).
+- If non-cue text shows current use, choose (b).
+- If non-cue text is not about patient or status unclear, choose (d).
+- Choose the label best supported by non-cue evidence, even if it matches Proposer.
+
 Return:
 letter: <a|b|c|d>
 spans:
@@ -196,13 +204,19 @@ def parse_refuter_output(output: str) -> Tuple[Optional[str], List[str]]:
     letter = None
     spans = []
     
-    # Extract letter
+    # Extract letter - try multiple patterns
+    # Pattern 1: "letter: b" or "letter: <b>"
     letter_match = re.search(r'letter:\s*([abcd])', output, re.IGNORECASE)
     if letter_match:
         letter = letter_match.group(1).lower()
     else:
-        # Fallback: try parse_model_output
-        letter = parse_model_output(output)
+        # Pattern 2: "Return: b" (sometimes model outputs this)
+        return_match = re.search(r'return:?\s*([abcd])', output, re.IGNORECASE)
+        if return_match:
+            letter = return_match.group(1).lower()
+        else:
+            # Pattern 3: Fallback to parse_model_output (finds (a), a, etc.)
+            letter = parse_model_output(output)
     
     # Extract spans
     spans_section = re.search(r'spans?:?\s*\n((?:-.*\n?)*)', output, re.IGNORECASE | re.MULTILINE)

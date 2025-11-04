@@ -1,0 +1,95 @@
+{
+  "split": "dev",
+  "baseline_run": "20251103_174939",
+  "agentic_run": "20251103_175800",
+  "timestamp": "20251103_175859",
+  "deltas": {
+    "accuracy": {
+      "baseline": 0.3631123919308357,
+      "agentic": 0.6772334293948127,
+      "absolute": 0.31412103746397696,
+      "relative": 86.5079365079365
+    },
+    "fpr": {
+      "baseline": 0.4765957446808511,
+      "agentic": 0.0,
+      "absolute": -0.4765957446808511,
+      "relative": -100.0
+    },
+    "per_class": {
+      "Not Applicable": {
+        "f1": {
+          "baseline": 0.0,
+          "agentic": 0.0,
+          "absolute": 0.0
+        },
+        "precision": {
+          "baseline": 0.0,
+          "agentic": 0.0,
+          "absolute": 0.0
+        },
+        "recall": {
+          "baseline": 0.0,
+          "agentic": 0.0,
+          "absolute": 0.0
+        },
+        "support": 0
+      },
+      "current": {
+        "f1": {
+          "baseline": 0.3673469387755102,
+          "agentic": 0.0,
+          "absolute": -0.3673469387755102
+        },
+        "precision": {
+          "baseline": 0.9,
+          "agentic": 0.0,
+          "absolute": -0.9
+        },
+        "recall": {
+          "baseline": 0.23076923076923078,
+          "agentic": 0.0,
+          "absolute": -0.23076923076923078
+        },
+        "support": 78
+      },
+      "none": {
+        "f1": {
+          "baseline": 0.5110410094637224,
+          "agentic": 0.8075601374570446,
+          "absolute": 0.29651912799332214
+        },
+        "precision": {
+          "baseline": 0.9878048780487805,
+          "agentic": 0.6772334293948127,
+          "absolute": -0.3105714486539678
+        },
+        "recall": {
+          "baseline": 0.3446808510638298,
+          "agentic": 1.0,
+          "absolute": 0.6553191489361703
+        },
+        "support": 235
+      },
+      "past": {
+        "f1": {
+          "baseline": 0.2634146341463414,
+          "agentic": 0.0,
+          "absolute": -0.2634146341463414
+        },
+        "precision": {
+          "baseline": 0.15789473684210525,
+          "agentic": 0.0,
+          "absolute": -0.15789473684210525
+        },
+        "recall": {
+          "baseline": 0.7941176470588235,
+          "agentic": 0.0,
+          "absolute": -0.7941176470588235
+        },
+        "support": 34
+      }
+    },
+    "n_samples": 347
+  }
+}

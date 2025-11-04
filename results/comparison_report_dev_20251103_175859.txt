@@ -1,0 +1,99 @@
+================================================================================
+BASELINE vs AGENTIC COMPREHENSIVE COMPARISON REPORT
+================================================================================
+
+EXPERIMENT METADATA
+--------------------------------------------------------------------------------
+Date: 2025-11-03 17:58:59
+Split: DEV
+Baseline Run ID: 20251103_174939
+Agentic Run ID: 20251103_175800
+
+DATA DESCRIPTION
+--------------------------------------------------------------------------------
+Total Samples: 347
+Baseline Samples: 347
+Agentic Samples: 347
+
+Data Sources (Baseline):
+  - mimic: 101
+  - uw: 246
+
+Data Sources (Agentic):
+  - mimic: 101
+  - uw: 246
+
+Label Distribution (Baseline):
+  - current: 78 (22.5%)
+  - none: 235 (67.7%)
+  - past: 34 (9.8%)
+
+Label Distribution (Agentic):
+  - current: 78 (22.5%)
+  - none: 235 (67.7%)
+  - past: 34 (9.8%)
+
+TIMING INFORMATION
+--------------------------------------------------------------------------------
+Baseline Inference Time: 495.73 seconds
+Baseline Time per Sample: 1.4286 seconds
+
+Agentic Inference Time: 54.72 seconds
+Agentic Time per Sample: 0.1577 seconds
+Speedup Factor: 9.06x
+
+OVERALL METRICS
+--------------------------------------------------------------------------------
+Accuracy:
+  Baseline: 0.3631
+  Agentic:  0.6772
+  Change:   +0.3141 (+86.5%)
+
+FPR (False Positive Rate) - PRIMARY METRIC:
+  Baseline: 0.4766
+  Agentic:  0.0000
+  Change:   -0.4766 (-100.0%)
+  ✅ FPR IMPROVED by 100.0% (relative reduction)
+
+PER-CLASS METRICS
+--------------------------------------------------------------------------------
+
+NOT APPLICABLE (support: 0):
+  F1           Baseline: 0.0000  Agentic: 0.0000  Change: +0.0000
+  Precision    Baseline: 0.0000  Agentic: 0.0000  Change: +0.0000
+  Recall       Baseline: 0.0000  Agentic: 0.0000  Change: +0.0000
+
+CURRENT (support: 78):
+  F1           Baseline: 0.3673  Agentic: 0.0000  Change: -0.3673
+  Precision    Baseline: 0.9000  Agentic: 0.0000  Change: -0.9000
+  Recall       Baseline: 0.2308  Agentic: 0.0000  Change: -0.2308
+
+NONE (support: 235):
+  F1           Baseline: 0.5110  Agentic: 0.8076  Change: +0.2965
+  Precision    Baseline: 0.9878  Agentic: 0.6772  Change: -0.3106
+  Recall       Baseline: 0.3447  Agentic: 1.0000  Change: +0.6553
+
+PAST (support: 34):
+  F1           Baseline: 0.2634  Agentic: 0.0000  Change: -0.2634
+  Precision    Baseline: 0.1579  Agentic: 0.0000  Change: -0.1579
+  Recall       Baseline: 0.7941  Agentic: 0.0000  Change: -0.7941
+
+DETAILED METRICS BREAKDOWN
+--------------------------------------------------------------------------------
+Baseline Metrics:
+  Accuracy: 0.3631
+  FPR: 0.4766
+  Precision (macro): 0.0000
+  Recall (macro): 0.0000
+  F1 (macro): 0.0000
+
+Agentic Metrics:
+  Accuracy: 0.6772
+  FPR: 0.0000
+  Precision (macro): 0.0000
+  Recall (macro): 0.0000
+  F1 (macro): 0.0000
+
+================================================================================
+END OF REPORT
+================================================================================
